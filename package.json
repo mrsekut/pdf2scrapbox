@@ -1,0 +1,30 @@
+{
+  "name": "pdf2scrapbox",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "prettier": {
+    "jsxSingleQuote": true,
+    "singleQuote": true,
+    "tabWidth": 2,
+    "trailingComma": "none",
+    "arrowParens": "avoid"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "canvas": "^2.8.0",
+    "gyazo-api": "^0.3.1",
+    "pdfjs-dist": "^2.8.335"
+  },
+  "devDependencies": {
+    "@types/node": "^16.6.1",
+    "@types/request": "^2.48.7",
+    "dotenv": "^10.0.0",
+    "prettier": "^2.3.2"
+  }
+}

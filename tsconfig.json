@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    "sourceMap": true,
+    "module": "commonjs",
+    "target": "es6",
+    "typeRoots": ["types", "node_modules/@types"],
+    "baseUrl": "src",
+    "paths": {
+      "app/*": ["./*"],
+      "fast-json-stable-stringify": ["src/types/fast-json-stable-stringify"]
+    },
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "lib": ["dom", "es2015.promise", "es5", "es2015", "ES2019.Array"],
+    "experimentalDecorators": true,
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "strictPropertyInitialization": false,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "isolatedModules": true,
+
+    "strict": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noUncheckedIndexedAccess": false,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true
+  },
+  "include": ["./**/*"],
+  "exclude": ["node_modules"]
+}
