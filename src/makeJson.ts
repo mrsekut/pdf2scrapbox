@@ -1,14 +1,13 @@
 import fs from 'fs/promises';
-import path from 'path';
 import * as pdfjs from 'pdfjs-dist/legacy/build/pdf.js';
 import nodeCanvas from 'canvas';
-import Gyazo from 'gyazo-api';
 import { PDFPageProxy } from 'pdfjs-dist/types/display/api';
 
 import * as dotenv from 'dotenv';
-import { Page, Project } from './types';
 import { range } from './utils';
-import { getHash } from './gyazo';
+import * as Gyazo from './gyazo';
+import { getFileInfo, mkdir, saveImage } from './file';
+import { PageWithGyazo, saveJson } from './scrapbox';
 dotenv.config();
 
 /**
@@ -27,40 +26,22 @@ type Config = {
 main();
 
 async function main() {
-  const { filename, filepath } = getFileInfo();
+  const { filename, filepath } = getFileInfo('.pdf');
 
   await mkdir(filename);
 
-  const pages = await readPDF(filepath);
+  const pdfs = await readPDF(filepath);
 
   const config: Config = {
     scale: 300 / 72,
-    keta: pages.length.toString().length
+    keta: pdfs.length.toString().length
   };
 
-  const files = await saveImages(pages, config, filename);
-  const urls = await uploadsToGyazo(files);
-  await saveJson(urls, filename, config);
-}
+  const files = await makeImagesFromPDF(pdfs, config, filename);
+  const urls = await Gyazo.uploads(files);
+  const pages = await makePages(urls, config);
 
-function getFileInfo() {
-  if (process.argv.slice(2) == null) {
-    throw new Error('invalid argument');
-  }
-
-  const filepath = process.argv[2];
-  return {
-    filepath,
-    filename: path.basename(filepath, '.pdf')
-  };
-}
-
-async function mkdir(filename: string) {
-  try {
-    await fs.stat(`out/${filename}`);
-  } catch {
-    await fs.mkdir(`out/${filename}`, { recursive: true });
-  }
+  await saveJson(`out/${filename}.json`, { pages });
 }
 
 async function readPDF(path: string) {
@@ -89,11 +70,13 @@ async function getViewport(pages: PDFPageProxy[], scale: number) {
   return { width, height };
 }
 
-async function saveImages(
+type ImagePath = string;
+
+async function makeImagesFromPDF(
   pages: PDFPageProxy[],
   config: Config,
   filename: string
-) {
+): Promise<ImagePath[]> {
   const { width, height } = await getViewport(pages, config.scale);
   const canvas = nodeCanvas.createCanvas(width, height);
   const context = canvas.getContext('2d');
@@ -113,18 +96,7 @@ async function saveImages(
   return files;
 }
 
-async function uploadsToGyazo(files: string[]) {
-  const urls = await Promise.all(
-    files.map(async file => {
-      const gyazo = new Gyazo(process.env['GYAZO_TOKEN']); // FIXME: any
-      const res = await gyazo.upload(file);
-      return res.data.permalink_url as string;
-    })
-  );
-  return urls;
-}
-
-async function saveJson(urls: string[], filename: string, config: Config) {
+async function makePages(urls: string[], config: Config) {
   const pages = await Promise.all(
     urls.map((url, i) => {
       const id = pad(i, config.keta);
@@ -132,17 +104,7 @@ async function saveJson(urls: string[], filename: string, config: Config) {
       return renderPage(id, pageN, url);
     })
   );
-
-  const project: Project = { pages };
-
-  fs.writeFile(`out/${filename}.json`, JSON.stringify(project));
-}
-
-async function saveImage(buffer: Buffer, filename: string, id: string) {
-  const file = `out/${filename}/${id}.jpg`;
-  await fs.writeFile(file, buffer);
-
-  return file;
+  return pages;
 }
 
 type PageNum = {
@@ -150,7 +112,11 @@ type PageNum = {
   next: string;
 };
 
-function renderPage(title: string, pageNum: PageNum, gyazoUrl: string): Page {
+function renderPage(
+  title: string,
+  pageNum: PageNum,
+  gyazoUrl: string
+): PageWithGyazo {
   const lines = [
     title,
     `[${pageNum.prev}] [${pageNum.next}]`,
@@ -158,7 +124,7 @@ function renderPage(title: string, pageNum: PageNum, gyazoUrl: string): Page {
     `[${pageNum.prev}] [${pageNum.next}]`
   ];
 
-  return { title, lines, gyazo: getHash(gyazoUrl) };
+  return { title, lines, gyazo: Gyazo.getHash(gyazoUrl) };
 }
 
 function pageNum(i: number, keta: number, length: number) {

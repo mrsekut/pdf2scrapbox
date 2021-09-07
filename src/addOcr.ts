@@ -1,41 +1,35 @@
-import fs from "fs/promises";
-import path from "path";
-import { image } from "./gyazo";
-
-const main = async () => {
-  // const [file] = process.argv.slice(2);
-  // console.log(file);
-  // const name = path.basename(file, ".json");
-
-  // const json = JSON.parse(await fs.readFile(file));
-
-  // const pagePromises = json.pages.reverse().map(async (page) => {
-  //   const { lines } = page;
-  //   const gyazoImages = lines.filter((l) => l.match(/gyazo.com\/[0-9a-f]{32}/i));
-  //   const links = gyazoImages.map(
-  //     line => line.match(/gyazo.com\/([0-9a-f]{32})/i)[1]
-  //   );
-  //   const ocrs = await Promise.all(
-  //     links.map(async (id) => {
-  //       const { data } = await image({ image_id: id });
-  //       return data.ocr;
-  //     })
-  //   );
-  //   const ocrLines = ocrs
-  //     .filter((a) => !!a)
-  //     .map((ocr) => ocr.description)
-  //     .flatMap((desc) => desc.split("\n"))
-  //     .map((line) => ">" + line);
-  //   lines.push("");
-  //   lines.push("(OCR text)");
-  //   lines.push(...ocrLines);
-
-  //   return { ...page, lines };
-  // });
-
-  // const newJson = { pages: await Promise.all(pagePromises) };
-
-  // fs.writeFile(`out/${name}-ocr.json`, JSON.stringify(newJson));
-}
+import fs from 'fs/promises';
+import * as dotenv from 'dotenv';
+import { getFileInfo } from './file';
+import { fetchImage, GyazoOCR } from './gyazo';
+import { Page, PageWithGyazo, ProjectWithGyazo, saveJson } from './scrapbox';
+dotenv.config();
 
 main();
+
+async function main() {
+  const { filename, filepath } = getFileInfo('.json');
+
+  const project = await getProjectFrom(filepath);
+  const pages = await makePages(project);
+  await saveJson(`out/${filename}-ocr.json`, { pages });
+}
+
+/**
+ *
+ */
+async function makePages(project: ProjectWithGyazo): Promise<Page[]> {
+  return await Promise.all(project.pages.reverse().map(makePage));
+}
+
+async function makePage({ title, lines, gyazo }: PageWithGyazo) {
+  const g = (await fetchImage(gyazo)) as GyazoOCR;
+  const ocrLines = g.ocr.description.split('\n').map(line => '>' + line);
+  return { title, lines: [...lines, '', '(OCR text)', ...ocrLines] };
+}
+
+async function getProjectFrom(filepath: string): Promise<ProjectWithGyazo> {
+  const buf = await fs.readFile(filepath);
+  const project = JSON.parse(buf.toString());
+  return project;
+}
