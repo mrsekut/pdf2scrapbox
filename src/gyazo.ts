@@ -1,31 +1,62 @@
 import Gyazo from 'gyazo-api';
-
+import * as t from 'io-ts';
+import { PathReporter } from 'io-ts/lib/PathReporter';
+import * as E from 'fp-ts/Either';
+import { pipe } from 'fp-ts/function';
 import request from 'request';
 import * as dotenv from 'dotenv';
 dotenv.config();
 
-type Url = string;
+/**
+ *
+ * Types
+ *
+ */
+export type GyazoOCR = t.TypeOf<typeof GyazoOCR>;
 
-export type GyazoOCR = {
-  image_id: string;
-  type: 'png';
-  created_at: string;
-  permalink_url: Url;
-  thumb_url: Url;
-  url: Url;
-  metadata: {
-    app: null;
-    title: null;
-    original_title: null;
-    url: null;
-    original_url: null;
-    desc: '';
-  };
-  ocr: {
-    locale: 'en';
-    description: string;
-  };
-};
+/**
+ *
+ * io-ts
+ *
+ */
+
+const Url = t.string;
+
+const MetaData = t.type({
+  app: t.null,
+  title: t.null,
+  original_title: t.null,
+  url: t.null,
+  original_url: t.null,
+  desc: t.literal('')
+});
+
+const Locale = t.keyof({
+  ja: null,
+  en: null
+});
+
+const Ocr = t.type({
+  locale: Locale,
+  description: t.string
+});
+
+const GyazoOCR = t.type({
+  image_id: t.string,
+  type: t.literal('png'),
+  created_at: t.string, // FIXME: Date
+  permalink_url: Url,
+  thumb_url: Url,
+  url: Url,
+  metadata: MetaData,
+  ocr: Ocr
+});
+
+/**
+ *
+ * functions
+ *
+ */
 
 export async function uploads(files: string[]) {
   const urls = await Promise.all(
@@ -52,8 +83,16 @@ export function fetchImage(imageId: string) {
         if (err) return reject(err);
         if (res.statusCode !== 200) return reject(res.body);
 
-        const a: GyazoOCR = JSON.parse(res.body);
-        resolve(a);
+        const r = GyazoOCR.decode(JSON.parse(res.body));
+        console.log(PathReporter.report(r));
+
+        pipe(
+          r,
+          E.fold(
+            e => reject(e),
+            r => resolve(r)
+          )
+        );
       }
     );
   });

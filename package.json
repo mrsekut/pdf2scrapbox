@@ -18,7 +18,9 @@
   "license": "ISC",
   "dependencies": {
     "canvas": "^2.8.0",
+    "fp-ts": "^2.11.1",
     "gyazo-api": "^0.3.1",
+    "io-ts": "^2.2.16",
     "pdfjs-dist": "^2.8.335"
   },
   "devDependencies": {
