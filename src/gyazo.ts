@@ -36,10 +36,10 @@ const Locale = t.keyof({
   en: null
 });
 
-const Ocr = t.type({
-  locale: Locale,
-  description: t.string
-});
+const Ocr = t.union([
+  t.type({ locale: Locale, description: t.string }),
+  t.type({ locale: t.null, description: t.literal('') })
+]);
 
 const GyazoOCR = t.type({
   image_id: t.string,
