@@ -18,12 +18,14 @@
   "license": "ISC",
   "dependencies": {
     "canvas": "^2.8.0",
+    "cli-progress": "^3.9.1",
     "fp-ts": "^2.11.1",
     "gyazo-api": "^0.3.1",
     "io-ts": "^2.2.16",
     "pdfjs-dist": "^2.8.335"
   },
   "devDependencies": {
+    "@types/cli-progress": "^3.9.2",
     "@types/node": "^16.6.1",
     "@types/request": "^2.48.7",
     "dotenv": "^10.0.0",

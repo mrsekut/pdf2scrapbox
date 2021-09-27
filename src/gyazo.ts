@@ -4,6 +4,8 @@ import { PathReporter } from 'io-ts/lib/PathReporter';
 import * as E from 'fp-ts/Either';
 import { pipe } from 'fp-ts/function';
 import request from 'request';
+import { Presets, SingleBar } from 'cli-progress';
+
 import * as dotenv from 'dotenv';
 dotenv.config();
 
@@ -58,14 +60,28 @@ const GyazoOCR = t.type({
  *
  */
 
+const bar = new SingleBar(
+  {
+    format: '{bar} | {percentage}% | {value}/{total} pages uploaded',
+    barCompleteChar: '\u2588',
+    barIncompleteChar: '\u2591',
+    hideCursor: true
+  },
+  Presets.shades_grey
+);
+
 export async function uploads(files: string[]) {
+  bar.start(files.length, 0, { speed: 'N/A' });
+
   const urls = await Promise.all(
     files.map(async file => {
       const gyazo = new Gyazo(process.env['GYAZO_TOKEN']); // FIXME: any
       const res = await gyazo.upload(file);
+      bar.increment();
       return res.data.permalink_url as string;
     })
   );
+  bar.stop();
   return urls;
 }
 

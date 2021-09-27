@@ -7,3 +7,7 @@ export function range(n1: number, n2?: number) {
   const end = n2;
   return [...Array(end - start + 1)].map((_, i) => start + i);
 }
+
+export function pad(num: number, keta: number) {
+  return num.toString().padStart(keta, '0');
+}
