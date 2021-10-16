@@ -11,3 +11,10 @@ export function range(n1: number, n2?: number) {
 export function pad(num: number, keta: number) {
   return num.toString().padStart(keta, '0');
 }
+
+export function chunk<T>(array: T[], size = 1): T[][] {
+  return array.reduce(
+    (acc: T[][], _, i) => (i % size ? acc : [...acc, array.slice(i, i + size)]),
+    []
+  );
+}
