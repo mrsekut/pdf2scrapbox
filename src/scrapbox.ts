@@ -8,7 +8,7 @@ import * as t from 'io-ts';
  */
 export type Page = t.TypeOf<typeof Page>;
 
-export type Project = t.TypeOf<typeof Project>;
+type Project = t.TypeOf<typeof Project>;
 
 export type ProjectWithGyazo = t.TypeOf<typeof ProjectWithGyazo>;
 
