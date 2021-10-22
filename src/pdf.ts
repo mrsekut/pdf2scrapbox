@@ -1,10 +1,11 @@
 import nodeCanvas from 'canvas';
 import { PDFPageProxy } from 'pdfjs-dist/types/display/api';
+import fs from 'fs/promises';
+import * as pdfjs from 'pdfjs-dist/legacy/build/pdf.js';
+import { pad, range } from './utils';
+import { saveImage } from './file';
 
 import * as dotenv from 'dotenv';
-import { pad } from './utils';
-import { saveImage } from './file';
-import { Presets, SingleBar } from 'cli-progress';
 dotenv.config();
 
 /**
@@ -26,40 +27,38 @@ type ImagePath = string;
  *
  */
 
-const bar = new SingleBar(
-  {
-    format: '{bar} | {percentage}% | {value}/{total} images generated',
-    barCompleteChar: '\u2588',
-    barIncompleteChar: '\u2591',
-    hideCursor: true
-  },
-  Presets.shades_classic
-);
+export async function readPDF(path: string) {
+  const src = await fs.readFile(path);
+  const doc = await pdfjs.getDocument(src).promise;
+  const pages = await Promise.all(
+    range(doc.numPages).map(i => doc.getPage(i + 1))
+  );
+
+  return pages;
+}
 
 export async function generateImagesFromPDF(
   pages: PDFPageProxy[],
   config: Config,
-  filename: string
+  filename: string,
+  startIndex: number
 ): Promise<ImagePath[]> {
   const { width, height } = await getViewport(pages, config.scale);
   const canvas = nodeCanvas.createCanvas(width, height);
   const context = canvas.getContext('2d');
 
   const imgPaths: string[] = [];
-  bar.start(pages.length, 0, { speed: 'N/A' });
-  for (let [i, page] of pages.map((page, i) => [i, page] as const)) {
+
+  for await (const [i, page] of pages.entries()) {
     await page.render({
       canvasContext: context,
       viewport: page.getViewport({ scale: config.scale })
     }).promise;
 
-    const id = pad(i, config.keta);
+    const id = pad(i + startIndex, config.keta);
     const file = await saveImage(canvas.toBuffer(), filename, id);
     imgPaths.push(file);
-    bar.increment();
   }
-
-  bar.stop();
 
   return imgPaths;
 }

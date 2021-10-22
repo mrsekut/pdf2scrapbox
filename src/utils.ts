@@ -18,3 +18,7 @@ export function chunk<T>(array: T[], size = 1): T[][] {
     []
   );
 }
+
+export function sleep(milliseconds: number) {
+  return new Promise(resolve => setTimeout(resolve, milliseconds));
+}
