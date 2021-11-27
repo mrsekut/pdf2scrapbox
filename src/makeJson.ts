@@ -4,7 +4,7 @@ import * as Gyazo from './gyazo';
 import { getFileInfo, mkdir } from './file';
 import { PageWithGyazo, saveJson } from './scrapbox';
 import { generateImagesFromPDF, readPDF } from './pdf';
-import { PDFPageProxy } from 'pdfjs-dist/types/display/api';
+import { PDFPageProxy } from 'pdfjs-dist/types/src/display/api';
 dotenv.config();
 
 /**

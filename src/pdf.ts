@@ -1,5 +1,5 @@
 import nodeCanvas from 'canvas';
-import { PDFPageProxy } from 'pdfjs-dist/types/display/api';
+import { PDFPageProxy } from 'pdfjs-dist/types/src/display/api';
 import fs from 'fs/promises';
 import * as pdfjs from 'pdfjs-dist/legacy/build/pdf.js';
 import { pad, range } from './utils';
