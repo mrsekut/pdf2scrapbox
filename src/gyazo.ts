@@ -4,6 +4,7 @@ import { PathReporter } from 'io-ts/lib/PathReporter';
 import * as E from 'fp-ts/Either';
 import { pipe } from 'fp-ts/function';
 import request from 'request';
+import { Newtype, iso } from 'newtype-ts';
 
 import * as dotenv from 'dotenv';
 dotenv.config();
@@ -14,6 +15,10 @@ dotenv.config();
  *
  */
 export type GyazoOCR = t.TypeOf<typeof GyazoOCR>;
+
+export interface GyazoUrl
+  extends Newtype<{ readonly GyazoUrl: unique symbol }, string> {}
+const isoGyazoUrl = iso<GyazoUrl>();
 
 /**
  *
@@ -59,12 +64,12 @@ const GyazoOCR = t.type({
  *
  */
 
-export async function uploads(files: string[]) {
+export async function uploads(images: string[]) {
   const urls = await Promise.all(
-    files.map(async file => {
+    images.map(async file => {
       const gyazo = new Gyazo(process.env['GYAZO_TOKEN']); // FIXME: any
       const res = await gyazo.upload(file);
-      return res.data.permalink_url as string;
+      return isoGyazoUrl.wrap(res.data.permalink_url)
     })
   );
   return urls;
@@ -99,9 +104,8 @@ export function fetchImage(imageId: string) {
   });
 }
 
-// FIXME: type
-export function getHash(gyazoUrl: string) {
-  const m = gyazoUrl.match(/gyazo.com\/([0-9a-f]{32})/i);
+export function getHash(gyazoUrl: GyazoUrl) {
+  const m = isoGyazoUrl.unwrap(gyazoUrl).match(/gyazo.com\/([0-9a-f]{32})/i);
   if (m == null) {
     return '';
   }

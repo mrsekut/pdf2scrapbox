@@ -94,7 +94,11 @@ async function batches<T, R>(
   return results;
 }
 
-async function makePages(urls: string[], config: Config, startIndex: number) {
+async function makePages(
+  urls: Gyazo.GyazoUrl[],
+  config: Config,
+  startIndex: number
+) {
   const pages = await Promise.all(
     urls.map((url, i) => {
       const id = pad(i + startIndex, config.keta);
@@ -120,7 +124,7 @@ type PageNum = {
 function renderPage(
   title: string,
   pageNum: PageNum,
-  gyazoUrl: string
+  gyazoUrl: Gyazo.GyazoUrl
 ): PageWithGyazo {
   const lines = [
     title,
