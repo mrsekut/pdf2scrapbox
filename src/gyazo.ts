@@ -39,7 +39,8 @@ const MetaData = t.type({
 
 const Locale = t.keyof({
   ja: null,
-  en: null
+  en: null,
+  sv: null
 });
 
 const Ocr = t.union([
@@ -69,7 +70,7 @@ export async function uploads(images: string[]) {
     images.map(async file => {
       const gyazo = new Gyazo(process.env['GYAZO_TOKEN']); // FIXME: any
       const res = await gyazo.upload(file);
-      return isoGyazoUrl.wrap(res.data.permalink_url)
+      return isoGyazoUrl.wrap(res.data.permalink_url);
     })
   );
   return urls;
@@ -90,7 +91,10 @@ export function fetchImage(imageId: string) {
         if (res.statusCode !== 200) return reject(res.body);
 
         const r = GyazoOCR.decode(JSON.parse(res.body));
-        console.log(PathReporter.report(r));
+        if (E.isLeft(r)) {
+          console.log(JSON.parse(res.body));
+          console.log(PathReporter.report(r));
+        }
 
         pipe(
           r,
