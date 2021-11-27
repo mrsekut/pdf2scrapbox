@@ -84,10 +84,12 @@ async function batches<T, R>(
 ): Promise<R[]> {
   const results: R[] = [];
 
-  for await (const [index, xs] of xss.entries()) {
-    const result = await batch(xs, index * xs.length);
+  let index = 0;
+  for await (const xs of xss) {
+    const result = await batch(xs, index);
     results.push(result);
-    console.log(`${index * xs.length}=============================`);
+    console.log(`${index}=============================`);
+    index += xs.length;
     await sleep(milliseconds);
   }
 
