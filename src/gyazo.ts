@@ -40,7 +40,8 @@ const MetaData = t.type({
 const Locale = t.keyof({
   ja: null,
   en: null,
-  sv: null
+  sv: null,
+  co: null
 });
 
 const Ocr = t.union([
