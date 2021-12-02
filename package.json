@@ -39,6 +39,8 @@
   "dependencies": {
     "canvas": "^2.8.0",
     "cli-progress": "^3.9.1",
+    "esbuild": "^0.14.1",
+    "esbuild-register": "^3.2.0",
     "fp-ts": "^2.11.5",
     "gyazo-api": "^0.3.1",
     "io-ts": "^2.2.16",
