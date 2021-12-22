@@ -7,6 +7,8 @@
   "author": "",
   "license": "ISC",
   "scripts": {
+    "makeJson": "node -r esbuild-register src/makeJson.ts",
+    "addOcr": "node -r esbuild-register src/addOcr.ts",
     "test": "jest"
   },
   "prettier": {
@@ -39,8 +41,6 @@
   "dependencies": {
     "canvas": "^2.8.0",
     "cli-progress": "^3.9.1",
-    "esbuild": "^0.14.1",
-    "esbuild-register": "^3.2.0",
     "fp-ts": "^2.11.5",
     "gyazo-api": "^0.3.1",
     "io-ts": "^2.2.16",
@@ -55,6 +55,8 @@
     "@types/node": "^16.11.10",
     "@types/request": "^2.48.7",
     "dotenv": "^10.0.0",
+    "esbuild": "^0.14.7",
+    "esbuild-register": "^3.2.1",
     "jest": "^27.3.1",
     "prettier": "^2.5.0",
     "ts-jest": "^27.0.7"
