@@ -37,15 +37,8 @@ const MetaData = t.type({
   desc: t.literal('')
 });
 
-const Locale = t.keyof({
-  ja: null,
-  en: null,
-  sv: null,
-  co: null
-});
-
 const Ocr = t.union([
-  t.type({ locale: Locale, description: t.string }),
+  t.type({ locale: t.unknown, description: t.string }),
   t.type({ locale: t.null, description: t.literal('') })
 ]);
 
