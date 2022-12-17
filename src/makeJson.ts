@@ -130,9 +130,9 @@ function renderPage(
 ): PageWithGyazo {
   const lines = [
     title,
-    `[${pageNum.prev}] [${pageNum.next}]`,
+    `prev: [${pageNum.prev}]`,
+    `next: [${pageNum.next}]`,
     `[[${gyazoUrl}]]`,
-    `[${pageNum.prev}] [${pageNum.next}]`
   ];
 
   return { title, lines, gyazo: Gyazo.getHash(gyazoUrl) };
