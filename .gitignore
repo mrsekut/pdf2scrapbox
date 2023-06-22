@@ -7,3 +7,5 @@ out
 .direnv/
 .envrc
 *.jpg
+
+.DS_Store
