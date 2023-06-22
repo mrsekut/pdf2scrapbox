@@ -24,7 +24,7 @@ async function makePages(project: ProjectWithGyazo): Promise<Page[]> {
 
 async function makePage({ title, lines, gyazo }: PageWithGyazo) {
   const g = (await fetchImage(gyazo)) as GyazoOCR;
-  const ocrLines = g.ocr.description.split('\n').map(line => '>' + line);
+  const ocrLines = g.ocr?.description.split('\n').map(line => '>' + line) ?? [];
   return { title, lines: [...lines, '', ...ocrLines] };
 }
 

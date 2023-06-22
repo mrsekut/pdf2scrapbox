@@ -39,7 +39,8 @@ const MetaData = t.type({
 
 const Ocr = t.union([
   t.type({ locale: t.unknown, description: t.string }),
-  t.type({ locale: t.null, description: t.literal('') })
+  t.type({ locale: t.null, description: t.literal('') }),
+  t.undefined
 ]);
 
 const GyazoOCR = t.type({
