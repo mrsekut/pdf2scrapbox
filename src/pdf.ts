@@ -2,30 +2,9 @@ import nodeCanvas from 'canvas';
 import { PDFPageProxy } from 'pdfjs-dist/types/src/display/api';
 import fs from 'fs/promises';
 import * as pdfjs from 'pdfjs-dist/legacy/build/pdf.js';
-import { pad, range } from './utils/utils';
-import { saveImage } from './utils/file';
-
-import * as dotenv from 'dotenv';
-dotenv.config();
-
-/**
- *
- * Types
- *
- */
-
-type Config = {
-  scale: number;
-  keta: number;
-};
+import { range } from './utils/utils';
 
 type ImagePath = string;
-
-/**
- *
- * functions
- *
- */
 
 export async function readPDF(path: string) {
   const src = await fs.readFile(path);
@@ -37,30 +16,23 @@ export async function readPDF(path: string) {
   return pages;
 }
 
-export async function generateImagesFromPDF(
-  pages: PDFPageProxy[],
-  config: Config,
-  filename: string,
-  startIndex: number
-): Promise<ImagePath[]> {
-  const { width, height } = await getViewport(pages, config.scale);
+export async function generateImageFromPDF(
+  page: PDFPageProxy,
+  scale: number,
+  savePath: string
+): Promise<ImagePath> {
+  const { width, height } = await getViewport([page], scale);
   const canvas = nodeCanvas.createCanvas(width, height);
   const context = canvas.getContext('2d');
 
-  const imgPaths: string[] = [];
+  await page.render({
+    canvasContext: context,
+    viewport: page.getViewport({ scale })
+  }).promise;
 
-  for await (const [i, page] of pages.entries()) {
-    await page.render({
-      canvasContext: context,
-      viewport: page.getViewport({ scale: config.scale })
-    }).promise;
+  await fs.writeFile(savePath, canvas.toBuffer());
 
-    const id = pad(i + startIndex, config.keta);
-    const file = await saveImage(canvas.toBuffer(), filename, id);
-    imgPaths.push(file);
-  }
-
-  return imgPaths;
+  return savePath;
 }
 
 async function getViewport(pages: PDFPageProxy[], scale: number) {

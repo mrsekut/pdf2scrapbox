@@ -22,11 +22,3 @@ export async function mkdir(filename: string) {
     await fs.mkdir(`out/${filename}`, { recursive: true });
   }
 }
-
-// FIXME: interface
-export async function saveImage(buffer: Buffer, filename: string, id: string) {
-  const file = `out/${filename}/${id}.jpg`;
-  await fs.writeFile(file, buffer);
-
-  return file;
-}
