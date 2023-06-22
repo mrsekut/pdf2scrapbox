@@ -1,7 +1,7 @@
 import * as dotenv from 'dotenv';
-import { chunk, pad, sleep } from './utils';
+import { chunk, pad, sleep } from './utils/utils';
 import * as Gyazo from './gyazo';
-import { getFileInfo, mkdir } from './file';
+import { getFileInfo, mkdir } from './utils/file';
 import { PageWithGyazo, saveJson } from './scrapbox';
 import { generateImagesFromPDF, readPDF } from './pdf';
 import { PDFPageProxy } from 'pdfjs-dist/types/src/display/api';
@@ -132,7 +132,7 @@ function renderPage(
     title,
     `prev: [${pageNum.prev}]`,
     `next: [${pageNum.next}]`,
-    `[[${gyazoUrl}]]`,
+    `[[${gyazoUrl}]]`
   ];
 
   return { title, lines, gyazo: Gyazo.getHash(gyazoUrl) };

@@ -2,8 +2,8 @@ import nodeCanvas from 'canvas';
 import { PDFPageProxy } from 'pdfjs-dist/types/src/display/api';
 import fs from 'fs/promises';
 import * as pdfjs from 'pdfjs-dist/legacy/build/pdf.js';
-import { pad, range } from './utils';
-import { saveImage } from './file';
+import { pad, range } from './utils/utils';
+import { saveImage } from './utils/file';
 
 import * as dotenv from 'dotenv';
 dotenv.config();

@@ -33,7 +33,7 @@
       }
     },
     "testMatch": [
-      "**/test/**/*.test.ts"
+      "**/*.test.ts"
     ],
     "moduleNameMapper": {
       "^app/(.+)": "<rootDir>/src/$1"
