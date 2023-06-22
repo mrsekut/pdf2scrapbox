@@ -8,8 +8,7 @@
   "license": "ISC",
   "packageManager": "npm@9.2.0",
   "scripts": {
-    "makeJson": "node -r esbuild-register src/makeJson.ts",
-    "addOcr": "node -r esbuild-register src/addOcr.ts",
+    "main": "node -r esbuild-register src/main.ts",
     "test": "vitest"
   },
   "prettier": {

@@ -16,9 +16,9 @@ dotenv.config();
  */
 export type GyazoOCR = t.TypeOf<typeof GyazoOCR>;
 
-export interface GyazoUrl
+export interface GyazoImageId
   extends Newtype<{ readonly GyazoUrl: unique symbol }, string> {}
-const isoGyazoUrl = iso<GyazoUrl>();
+const isoGyazoImageId = iso<GyazoImageId>();
 
 /**
  *
@@ -59,19 +59,18 @@ const GyazoOCR = t.type({
  * functions
  *
  */
-
-export async function uploads(images: string[]) {
-  const urls = await Promise.all(
-    images.map(async file => {
-      const gyazo = new Gyazo(process.env['GYAZO_TOKEN']); // FIXME: any
-      const res = await gyazo.upload(file);
-      return isoGyazoUrl.wrap(res.data.permalink_url);
-    })
-  );
-  return urls;
+export async function upload(imagePath: string) {
+  const gyazo = new Gyazo(process.env['GYAZO_TOKEN']); // FIXME: any
+  const res = await gyazo.upload(imagePath);
+  return isoGyazoImageId.wrap(res.data.image_id);
 }
 
-export function fetchImage(imageId: string) {
+export async function getGyazoOCR(imageId: GyazoImageId) {
+  const ocr = await fetchImage(imageId);
+  return ocr.ocr?.description ?? '';
+}
+
+function fetchImage(imageId: GyazoImageId): Promise<GyazoOCR> {
   const access_token = process.env['GYAZO_TOKEN'] as string;
 
   // FIXME:
@@ -91,22 +90,8 @@ export function fetchImage(imageId: string) {
           console.log(PathReporter.report(r));
         }
 
-        pipe(
-          r,
-          E.fold(
-            e => reject(e),
-            r => resolve(r)
-          )
-        );
+        pipe(r, E.fold(reject, resolve));
       }
     );
   });
-}
-
-export function getHash(gyazoUrl: GyazoUrl) {
-  const m = isoGyazoUrl.unwrap(gyazoUrl).match(/gyazo.com\/([0-9a-f]{32})/i);
-  if (m == null) {
-    return '';
-  }
-  return m[1];
 }
