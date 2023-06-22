@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 import * as dotenv from 'dotenv';
-import { getFileInfo } from './file';
+import { getFileInfo } from './utils/file';
 import { fetchImage, GyazoOCR } from './gyazo';
 import { Page, PageWithGyazo, ProjectWithGyazo, saveJson } from './scrapbox';
 dotenv.config();

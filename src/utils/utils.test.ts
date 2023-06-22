@@ -1,4 +1,4 @@
-import { chunk, pad, range } from 'app/utils';
+import { chunk, pad, range } from 'app/utils/utils';
 
 describe('range', () => {
   test('range', () => {
