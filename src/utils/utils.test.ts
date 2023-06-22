@@ -1,4 +1,5 @@
-import { chunk, pad, range } from 'app/utils/utils';
+import { describe, expect, test } from 'vitest';
+import { chunk, pad, range } from './utils';
 
 describe('range', () => {
   test('range', () => {
@@ -10,7 +11,7 @@ describe('range', () => {
 });
 
 describe('pad', () => {
-  it('pad', () => {
+  test('pad', () => {
     expect(pad(2, 1)).toEqual('2');
     expect(pad(2, 2)).toEqual('02');
     expect(pad(2, 3)).toEqual('002');
@@ -24,7 +25,7 @@ describe('pad', () => {
 });
 
 describe('chunks', () => {
-  it('chunk', () => {
+  test('chunk', () => {
     const array = [1, 2, 3, 4, 5, 6, 7, 8];
     expect(chunk(array, 1)).toEqual([[1], [2], [3], [4], [5], [6], [7], [8]]);
     expect(chunk(array, 3)).toEqual([

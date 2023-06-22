@@ -1,21 +1,22 @@
-import { pageNum, validate } from 'app/makeJson';
+import { describe, expect, test } from 'vitest';
+import { pageNum, validate } from './makeJson';
 
 describe('pageNum', () => {
-  it('first page', () => {
+  test('first page', () => {
     expect(pageNum(0, 10, 3)).toMatchObject({
       prev: '000',
       next: '001'
     });
   });
 
-  it('pages', () => {
+  test('pages', () => {
     expect(pageNum(1, 10, 3)).toMatchObject({
       prev: '000',
       next: '002'
     });
   });
 
-  it('last page', () => {
+  test('last page', () => {
     expect(pageNum(10, 10, 3)).toMatchObject({
       prev: '009',
       next: '011'
@@ -24,7 +25,7 @@ describe('pageNum', () => {
 });
 
 describe('validate', () => {
-  it('validate', () => {
+  test('validate', () => {
     const pages = [
       { start: 0, end: 150 },
       { start: 151, end: 300 },
@@ -34,7 +35,7 @@ describe('validate', () => {
     expect(validate(pages)).toEqual(true);
   });
 
-  it('validate', () => {
+  test('validate', () => {
     const pages = [
       { start: 0, end: 151 },
       { start: 151, end: 300 }
@@ -42,7 +43,7 @@ describe('validate', () => {
     expect(validate(pages)).toEqual(false);
   });
 
-  it('validate', () => {
+  test('validate', () => {
     const pages = [
       { start: 0, end: 149 },
       { start: 151, end: 300 }
