@@ -19,6 +19,7 @@
     "arrowParens": "avoid"
   },
   "dependencies": {
+    "bottleneck": "^2.19.5",
     "canvas": "^2.11.2",
     "cli-progress": "^3.12.0",
     "fp-ts": "^2.16.0",
@@ -26,6 +27,7 @@
     "io-ts": "^2.2.20",
     "monocle-ts": "^2.3.13",
     "newtype-ts": "^0.3.5",
+    "p-limit": "^4.0.0",
     "pdfjs-dist": "^3.7.107"
   },
   "devDependencies": {
