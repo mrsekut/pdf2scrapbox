@@ -39,7 +39,7 @@ export async function main(config: Config) {
     pdfs.map((pdf, index) =>
       limiter.schedule(() => {
         progressBar.increment();
-        return generatePage(pdf, filename, index, config);
+        return generatePage(pdf, filename, index, pdfs.length, config);
       })
     )
   );
@@ -53,6 +53,7 @@ const generatePage = async (
   pdf: PDFPageProxy,
   filename: string,
   index: number,
+  pageLength: number,
   config: Config
 ) => {
   const path = `out/${filename}/${index}.jpg`;
@@ -63,7 +64,7 @@ const generatePage = async (
   await sleep(config.waitTimeForOcr);
 
   const ocr = await Gyazo.getGyazoOCR(gyazoImageId);
-  const page = renderPage(index, gyazoImageId, ocr);
+  const page = renderPage(index, pageLength, gyazoImageId, ocr);
 
   return page;
 };

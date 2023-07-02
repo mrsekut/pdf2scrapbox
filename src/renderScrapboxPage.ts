@@ -1,4 +1,5 @@
 import type { GyazoImageId } from 'app/gyazo';
+import { pad } from 'app/utils/utils';
 import fs from 'fs/promises';
 import * as t from 'io-ts';
 
@@ -19,18 +20,21 @@ export async function saveJson(path: string, newJson: Project) {
 
 export function renderPage(
   index: number,
+  pageLength: number,
   gyazoImageId: GyazoImageId,
   ocrText: string
 ) {
-  const title = index;
+  const _pad = pad(`${pageLength}`.length);
+
+  const title = _pad(index);
   const page = pageNum(index);
   const url = `https://gyazo.com/${gyazoImageId}`;
   const ocrLines = ocrText.split('\n').map(line => '>' + line);
 
   const lines = [
     `${title}`,
-    `prev: [${page.prev}]`,
-    `next: [${page.next}]`,
+    `prev: [${_pad(page.prev)}]`,
+    `next: [${_pad(page.next)}]`,
     `[[${url}]]`,
     '',
     ...ocrLines
