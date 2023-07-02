@@ -23,8 +23,8 @@ export async function main(config: Config) {
   const pdfs = await readPDF(filepath);
 
   const limiter = new Bottleneck({
-    maxConcurrent: 50, // Maximum of 50 concurrent jobs
-    minTime: 333
+    maxConcurrent: 30,
+    minTime: 1000
   });
 
   const progressBar = new cliProgress.SingleBar(
