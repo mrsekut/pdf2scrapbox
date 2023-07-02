@@ -9,6 +9,7 @@
   "packageManager": "npm@9.2.0",
   "scripts": {
     "main": "tsx src/main.ts",
+    "tsc": "tsc",
     "test": "vitest"
   },
   "prettier": {
