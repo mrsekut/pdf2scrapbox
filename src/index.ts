@@ -13,6 +13,7 @@ dotenv.config();
 
 type Config = {
   scale: number;
+  waitTimeForOcr: number; // GyazoにアップロードしてからOCRが生成されるまでの待機時間(ms)
 };
 
 export async function main(config: Config) {
@@ -38,7 +39,7 @@ export async function main(config: Config) {
     pdfs.map((pdf, index) =>
       limiter.schedule(() => {
         progressBar.increment();
-        return generatePage(pdf, filename, index, config.scale);
+        return generatePage(pdf, filename, index, config);
       })
     )
   );
@@ -52,14 +53,14 @@ const generatePage = async (
   pdf: PDFPageProxy,
   filename: string,
   index: number,
-  scale: number
+  config: Config
 ) => {
   const path = `out/${filename}/${index}.jpg`;
 
-  const imagePath = await generateImageFromPDF(pdf, scale, path);
+  const imagePath = await generateImageFromPDF(pdf, config.scale, path);
   const gyazoImageId = await Gyazo.upload(imagePath);
 
-  await sleep(3000);
+  await sleep(config.waitTimeForOcr);
 
   const ocr = await Gyazo.getGyazoOCR(gyazoImageId);
   const page = renderPage(index, gyazoImageId, ocr);
