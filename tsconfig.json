@@ -11,7 +11,7 @@
     },
     "moduleResolution": "node",
     "esModuleInterop": true,
-    "lib": ["es2015.promise", "es5", "es2015", "ES2019.Array"],
+    "lib": ["ES2019"],
     "experimentalDecorators": true,
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
