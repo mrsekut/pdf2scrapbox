@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { chunk, pad, range } from './utils';
+import { chunk, range } from './utils';
 
 describe('range', () => {
   test('range', () => {
@@ -7,20 +7,6 @@ describe('range', () => {
     expect(range(5)).toEqual([0, 1, 2, 3, 4]);
     expect(range(1, 5)).toEqual([1, 2, 3, 4, 5]);
     expect(range(3, 5)).toEqual([3, 4, 5]);
-  });
-});
-
-describe('pad', () => {
-  test('pad', () => {
-    expect(pad(2, 1)).toEqual('2');
-    expect(pad(2, 2)).toEqual('02');
-    expect(pad(2, 3)).toEqual('002');
-    expect(pad(22, 3)).toEqual('022');
-    expect(pad(222, 3)).toEqual('222');
-
-    expect(pad(222, 0)).toEqual('222');
-    expect(pad(222, 1)).toEqual('222');
-    expect(pad(222, 2)).toEqual('222');
   });
 });
 
