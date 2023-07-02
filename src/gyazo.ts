@@ -3,7 +3,6 @@ import * as t from 'io-ts';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import * as E from 'fp-ts/Either';
 import { pipe } from 'fp-ts/function';
-import request from 'request';
 import { Newtype, iso } from 'newtype-ts';
 
 import * as dotenv from 'dotenv';
@@ -70,28 +69,42 @@ export async function getGyazoOCR(imageId: GyazoImageId) {
   return ocr.ocr?.description ?? '';
 }
 
-function fetchImage(imageId: GyazoImageId): Promise<GyazoOCR> {
+async function fetchImage(imageId: GyazoImageId): Promise<GyazoOCR> {
   const access_token = process.env['GYAZO_TOKEN'] as string;
 
-  // FIXME:
-  return new Promise((resolve, reject) => {
-    request.get(
-      {
-        url: `https://api.gyazo.com/api/images/${imageId}`,
-        qs: { access_token, image_id: imageId }
+  const res = await fetch(
+    `https://api.gyazo.com/api/images/${isoGyazoImageId.unwrap(
+      imageId
+    )}?access_token=${access_token}`
+  );
+
+  if (!res.ok) {
+    throw new Error('Failed to fetch image');
+  }
+
+  const data = await res.json();
+
+  const r = GyazoOCR.decode(data);
+  if (E.isLeft(r)) {
+    console.log(data);
+    console.log(PathReporter.report(r));
+  }
+
+  return pipe(
+    r,
+    E.fold(
+      (e: any) => {
+        throw new Error(e);
       },
-      (err, res) => {
-        if (err) return reject(err);
-        if (res.statusCode !== 200) return reject(res.body);
+      v => v
+    )
+  );
+}
 
-        const r = GyazoOCR.decode(JSON.parse(res.body));
-        if (E.isLeft(r)) {
-          console.log(JSON.parse(res.body));
-          console.log(PathReporter.report(r));
-        }
+// TODO: node.jsでfetchの型が提供されていない
+declare global {
+  function fetch(input: RequestInfo | URL): Promise<Response>;
 
-        pipe(r, E.fold(reject, resolve));
-      }
-    );
-  });
+  type RequestInfo = any;
+  type Response = any;
 }
