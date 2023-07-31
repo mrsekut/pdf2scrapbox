@@ -4,6 +4,7 @@ import { PathReporter } from 'io-ts/lib/PathReporter';
 import * as E from 'fp-ts/Either';
 import { pipe } from 'fp-ts/function';
 import { Newtype, iso } from 'newtype-ts';
+import { withRetry } from 'app/utils/utils';
 
 import * as dotenv from 'dotenv';
 dotenv.config();
@@ -58,9 +59,16 @@ const GyazoOCR = t.type({
  * functions
  *
  */
+
 export async function upload(imagePath: string) {
-  const gyazo = new Gyazo(process.env['GYAZO_TOKEN']); // FIXME: any
-  const res = await gyazo.upload(imagePath);
+  const gyazo = new Gyazo(process.env['GYAZO_TOKEN']);
+
+  // TODO: any
+  const res = await withRetry<any>(() => gyazo.upload(imagePath), {
+    maxRetries: 3,
+    retryInterval: 1000
+  });
+
   return isoGyazoImageId.wrap(res.data.image_id);
 }
 
@@ -88,6 +96,7 @@ async function fetchImage(imageId: GyazoImageId): Promise<GyazoOCR> {
   if (E.isLeft(r)) {
     console.log(data);
     console.log(PathReporter.report(r));
+    throw new Error('Failed to decode GyazoOCR.');
   }
 
   return pipe(
