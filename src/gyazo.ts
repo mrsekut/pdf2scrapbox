@@ -79,18 +79,25 @@ export async function getGyazoOCR(imageId: GyazoImageId) {
 
 async function fetchImage(imageId: GyazoImageId): Promise<GyazoOCR> {
   const access_token = process.env['GYAZO_TOKEN'] as string;
+  const data = await withRetry(
+    async () => {
+      const res = await fetch(
+        `https://api.gyazo.com/api/images/${isoGyazoImageId.unwrap(
+          imageId
+        )}?access_token=${access_token}`
+      );
 
-  const res = await fetch(
-    `https://api.gyazo.com/api/images/${isoGyazoImageId.unwrap(
-      imageId
-    )}?access_token=${access_token}`
+      if (!res.ok) {
+        throw new Error('Failed to fetch image');
+      }
+
+      return res.json();
+    },
+    {
+      maxRetries: 3,
+      retryInterval: 1000
+    }
   );
-
-  if (!res.ok) {
-    throw new Error('Failed to fetch image');
-  }
-
-  const data = await res.json();
 
   const r = GyazoOCR.decode(data);
   if (E.isLeft(r)) {
