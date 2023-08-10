@@ -27,7 +27,7 @@ export async function generateImageFromPDF(
 
   await page.render({
     canvasContext: context,
-    viewport: page.getViewport({ scale })
+    viewport: page.getViewport({ scale }),
   }).promise;
 
   await fs.writeFile(savePath, canvas.toBuffer());

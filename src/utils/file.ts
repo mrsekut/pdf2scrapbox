@@ -11,7 +11,7 @@ export function getFileInfo(extension: Extension) {
   const filepath = process.argv[2];
   return {
     filepath,
-    filename: path.basename(filepath, extension)
+    filename: path.basename(filepath, extension),
   };
 }
 

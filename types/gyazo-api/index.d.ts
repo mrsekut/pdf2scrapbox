@@ -1,22 +1,22 @@
-declare module 'gyazo-api'
+declare module 'gyazo-api';
 
 // FIXME: option
 type Params = {
   title: string;
   desc: string;
-}
+};
 
 // FIXME: option
 type Query = {
   access_token: string;
   page: number;
   per_page: number;
-}
+};
 
 class Gyazo {
   constructor(access_token: string);
 
-  upload(image: string, params: Params): Promise<unknown>
+  upload(image: string, params: Params): Promise<unknown>;
 
   list(query: Query): Promise<unknown>;
 

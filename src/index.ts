@@ -25,7 +25,7 @@ export async function main(config: Config) {
 
   const limiter = new Bottleneck({
     maxConcurrent: 30,
-    minTime: 1000
+    minTime: 1000,
   });
 
   const progressBar = new cliProgress.SingleBar(

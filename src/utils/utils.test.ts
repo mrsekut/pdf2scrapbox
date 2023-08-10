@@ -31,11 +31,11 @@ describe('chunks', () => {
     expect(chunk(array, 3)).toEqual([
       [1, 2, 3],
       [4, 5, 6],
-      [7, 8]
+      [7, 8],
     ]);
     expect(chunk(array, 5)).toEqual([
       [1, 2, 3, 4, 5],
-      [6, 7, 8]
+      [6, 7, 8],
     ]);
   });
 });

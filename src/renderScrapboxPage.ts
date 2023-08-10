@@ -34,12 +34,12 @@ export function renderPage(
     `next: [${_pad(page.next)}]`,
     `[[${url}]]`,
     '',
-    ...ocrLines
+    ...ocrLines,
   ];
 
   return {
     title: `${title}`,
-    lines
+    lines,
   };
 }
 
@@ -51,6 +51,6 @@ type PageNum = {
 function pageNum(current: number): PageNum {
   return {
     prev: current === 0 ? current : current - 1,
-    next: current + 1
+    next: current + 1,
   };
 }

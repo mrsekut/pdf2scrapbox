@@ -34,13 +34,13 @@ const MetaData = t.type({
   original_title: t.null,
   url: t.null,
   original_url: t.null,
-  desc: t.literal('')
+  desc: t.literal(''),
 });
 
 const Ocr = t.union([
   t.type({ locale: t.unknown, description: t.string }),
   t.type({ locale: t.null, description: t.literal('') }),
-  t.undefined
+  t.undefined,
 ]);
 
 const GyazoOCR = t.type({
@@ -51,7 +51,7 @@ const GyazoOCR = t.type({
   thumb_url: Url,
   url: Url,
   metadata: MetaData,
-  ocr: Ocr
+  ocr: Ocr,
 });
 
 /**
@@ -66,7 +66,7 @@ export async function upload(imagePath: string) {
   // TODO: any
   const res = await withRetry<any>(() => gyazo.upload(imagePath), {
     maxRetries: 3,
-    retryInterval: 1000
+    retryInterval: 1000,
   });
 
   return isoGyazoImageId.wrap(res.data.image_id);
@@ -95,7 +95,7 @@ async function fetchImage(imageId: GyazoImageId): Promise<GyazoOCR> {
     },
     {
       maxRetries: 3,
-      retryInterval: 1000
+      retryInterval: 1000,
     }
   );
 
