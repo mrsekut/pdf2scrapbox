@@ -1,56 +1,22 @@
 import Gyazo from 'gyazo-api';
-import * as t from 'io-ts';
-import { PathReporter } from 'io-ts/lib/PathReporter';
-import * as E from 'fp-ts/Either';
-import { pipe } from 'fp-ts/function';
-import { Newtype, iso } from 'newtype-ts';
 import { withRetry } from 'app/utils/utils';
 
 import * as dotenv from 'dotenv';
+import * as v from 'valibot';
 dotenv.config();
 
-/**
- *
- * Types
- *
- */
-export type GyazoOCR = t.TypeOf<typeof GyazoOCR>;
+export type GyazoImageId = v.Output<typeof GyazoImageId>;
+const GyazoImageId = v.string(); // TODO: brand
 
-export interface GyazoImageId
-  extends Newtype<{ readonly GyazoUrl: unique symbol }, string> {}
-const isoGyazoImageId = iso<GyazoImageId>();
-
-/**
- *
- * io-ts
- *
- */
-
-const Url = t.string;
-
-const MetaData = t.type({
-  app: t.null,
-  title: t.null,
-  original_title: t.null,
-  url: t.null,
-  original_url: t.null,
-  desc: t.literal(''),
-});
-
-const Ocr = t.union([
-  t.type({ locale: t.unknown, description: t.string }),
-  t.type({ locale: t.null, description: t.literal('') }),
-  t.undefined,
+const Ocr = v.union([
+  v.object({ locale: v.unknown(), description: v.string() }),
+  v.object({ locale: v.nullType(), description: v.literal('') }),
+  v.undefinedType(),
 ]);
 
-const GyazoOCR = t.type({
-  image_id: t.string,
-  type: t.literal('png'),
-  created_at: t.string, // FIXME: Date
-  permalink_url: Url,
-  thumb_url: Url,
-  url: Url,
-  metadata: MetaData,
+type GyazoOCR = v.Output<typeof GyazoOCR>;
+const GyazoOCR = v.object({
+  image_id: GyazoImageId,
   ocr: Ocr,
 });
 
@@ -60,7 +26,7 @@ const GyazoOCR = t.type({
  *
  */
 
-export async function upload(imagePath: string) {
+export async function upload(imagePath: string): Promise<GyazoImageId> {
   const gyazo = new Gyazo(process.env['GYAZO_TOKEN']);
 
   // TODO: any
@@ -69,7 +35,7 @@ export async function upload(imagePath: string) {
     retryInterval: 1000,
   });
 
-  return isoGyazoImageId.wrap(res.data.image_id);
+  return res.data.image_id;
 }
 
 export async function getGyazoOCR(imageId: GyazoImageId) {
@@ -82,9 +48,7 @@ async function fetchImage(imageId: GyazoImageId): Promise<GyazoOCR> {
   const data = await withRetry(
     async () => {
       const res = await fetch(
-        `https://api.gyazo.com/api/images/${isoGyazoImageId.unwrap(
-          imageId
-        )}?access_token=${access_token}`
+        `https://api.gyazo.com/api/images/${imageId}?access_token=${access_token}`
       );
 
       if (!res.ok) {
@@ -99,22 +63,12 @@ async function fetchImage(imageId: GyazoImageId): Promise<GyazoOCR> {
     }
   );
 
-  const r = GyazoOCR.decode(data);
-  if (E.isLeft(r)) {
-    console.log(data);
-    console.log(PathReporter.report(r));
+  try {
+    return v.parse(GyazoOCR, data);
+  } catch (e) {
+    console.error(e);
     throw new Error('Failed to decode GyazoOCR.');
   }
-
-  return pipe(
-    r,
-    E.fold(
-      (e: any) => {
-        throw new Error(e);
-      },
-      v => v
-    )
-  );
 }
 
 // TODO: node.jsでfetchの型が提供されていない
