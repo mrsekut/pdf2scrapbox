@@ -1,18 +1,15 @@
 import type { GyazoImageId } from 'app/gyazo';
 import { pad } from 'app/utils/utils';
 import fs from 'fs/promises';
-import * as t from 'io-ts';
 
-type Project = t.TypeOf<typeof Project>;
+type Project = {
+  pages: Page[];
+};
 
-const Page = t.type({
-  title: t.string,
-  lines: t.array(t.string)
-});
-
-const Project = t.type({
-  pages: t.array(Page)
-});
+type Page = {
+  title: string;
+  lines: string[];
+};
 
 export async function saveJson(path: string, newJson: Project) {
   fs.writeFile(path, JSON.stringify(newJson));
