@@ -3,12 +3,11 @@ import path from 'path';
 
 type Extension = '.json' | '.pdf';
 
-export function getFileInfo(extension: Extension) {
-  if (process.argv.slice(2) == null) {
+export function getFileInfo(filepath: string, extension: Extension) {
+  if (filepath === '') {
     throw new Error('invalid argument');
   }
 
-  const filepath = process.argv[2];
   return {
     filepath,
     filename: path.basename(filepath, extension),

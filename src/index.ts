@@ -9,15 +9,29 @@ import type { PDFPageProxy } from 'pdfjs-dist';
 import Bottleneck from 'bottleneck';
 import cliProgress from 'cli-progress';
 
+import fs from 'fs';
+import path from 'path';
+
 dotenv.config();
 
 type Config = {
   scale: number;
   waitTimeForOcr: number; // GyazoにアップロードしてからOCRが生成されるまでの待機時間(ms)
+  dir: string;
 };
 
 export async function main(config: Config) {
-  const { filename, filepath } = getFileInfo('.pdf');
+  const files = fs.readdirSync(config.dir);
+  const pdfs = files.filter(file => path.extname(file) === '.pdf');
+
+  for (const pdf of pdfs) {
+    const filepath = path.join(config.dir, pdf);
+    await processSinglePDF(config, filepath);
+  }
+}
+
+async function processSinglePDF(config: Config, filepath: string) {
+  const { filename } = getFileInfo(filepath, '.pdf');
 
   await mkdir(filename);
 
