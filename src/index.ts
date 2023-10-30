@@ -30,7 +30,7 @@ export async function main(config: Config) {
 
   const progressBar = new cliProgress.SingleBar(
     {},
-    cliProgress.Presets.shades_classic
+    cliProgress.Presets.shades_classic,
   );
 
   progressBar.start(pdfs.length, 0);
@@ -40,8 +40,8 @@ export async function main(config: Config) {
       limiter.schedule(() => {
         progressBar.increment();
         return generatePage(pdf, filename, index, pdfs.length, config);
-      })
-    )
+      }),
+    ),
   );
 
   progressBar.stop();
@@ -54,7 +54,7 @@ const generatePage = async (
   filename: string,
   index: number,
   pageLength: number,
-  config: Config
+  config: Config,
 ) => {
   const path = `out/${filename}/${index}.jpg`;
 

@@ -19,7 +19,7 @@ export function renderPage(
   index: number,
   pageLength: number,
   gyazoImageId: GyazoImageId,
-  ocrText: string
+  ocrText: string,
 ) {
   const _pad = pad(`${pageLength}`.length);
 

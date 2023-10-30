@@ -48,7 +48,7 @@ async function fetchImage(imageId: GyazoImageId): Promise<GyazoOCR> {
   const data = await withRetry(
     async () => {
       const res = await fetch(
-        `https://api.gyazo.com/api/images/${imageId}?access_token=${access_token}`
+        `https://api.gyazo.com/api/images/${imageId}?access_token=${access_token}`,
       );
 
       if (!res.ok) {
@@ -60,7 +60,7 @@ async function fetchImage(imageId: GyazoImageId): Promise<GyazoOCR> {
     {
       maxRetries: 3,
       retryInterval: 1000,
-    }
+    },
   );
 
   try {

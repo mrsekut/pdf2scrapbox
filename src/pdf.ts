@@ -15,7 +15,7 @@ export async function readPDF(path: string) {
     cMapPacked: true,
   }).promise;
   const pages = await Promise.all(
-    range(doc.numPages).map(i => doc.getPage(i + 1))
+    range(doc.numPages).map(i => doc.getPage(i + 1)),
   );
 
   return pages;
@@ -24,7 +24,7 @@ export async function readPDF(path: string) {
 export async function generateImageFromPDF(
   page: PDFPageProxy,
   scale: number,
-  savePath: string
+  savePath: string,
 ): Promise<ImagePath> {
   const { width, height } = await getViewport([page], scale);
   const canvas = nodeCanvas.createCanvas(width, height);
@@ -49,7 +49,7 @@ async function getViewport(pages: PDFPageProxy[], scale: number) {
     })
     .reduce(
       ([width, height], [w, h]) => [Math.max(width, w), Math.max(height, h)],
-      [0, 0]
+      [0, 0],
     )
     .map(x => x * scale);
 

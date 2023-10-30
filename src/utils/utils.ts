@@ -15,7 +15,7 @@ export const pad = (keta: number) => (num: number) => {
 export function chunk<T>(array: T[], size = 1): T[][] {
   return array.reduce(
     (acc: T[][], _, i) => (i % size ? acc : [...acc, array.slice(i, i + size)]),
-    []
+    [],
   );
 }
 
@@ -28,7 +28,7 @@ export const withRetry = async <T>(
   options: {
     maxRetries: number;
     retryInterval: number;
-  }
+  },
 ): Promise<T> => {
   return attempt(options.maxRetries);
 
