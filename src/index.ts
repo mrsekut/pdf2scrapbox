@@ -33,6 +33,8 @@ export async function main(config: Config) {
 async function processSinglePDF(config: Config, filepath: string) {
   const { filename } = getFileInfo(filepath, '.pdf');
 
+  console.log(`\nProcessing PDF: ${filename}\n`);
+
   await mkdir(filename);
 
   const pdfs = await readPDF(filepath);
@@ -61,6 +63,8 @@ async function processSinglePDF(config: Config, filepath: string) {
   progressBar.stop();
 
   await saveJson(`out/${filename}-ocr.json`, { pages });
+
+  console.log(`Finished processing PDF: ${filename}\n`);
 }
 
 const generatePage = async (
