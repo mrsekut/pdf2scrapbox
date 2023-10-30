@@ -9,7 +9,11 @@ type ImagePath = string;
 export async function readPDF(path: string) {
   const buffer = await fs.readFile(path);
   const src = new Uint8Array(buffer);
-  const doc = await pdfjs.getDocument(src).promise;
+  const doc = await pdfjs.getDocument({
+    data: src,
+    cMapUrl: './node_modules/pdfjs-dist/cmaps/',
+    cMapPacked: true,
+  }).promise;
   const pages = await Promise.all(
     range(doc.numPages).map(i => doc.getPage(i + 1))
   );
