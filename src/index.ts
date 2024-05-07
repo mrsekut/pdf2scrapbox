@@ -1,16 +1,17 @@
-import { getFileInfo, mkdir } from 'app/utils/file';
-import { generateImageFromPDF, readPDF } from 'app/pdf';
-import * as Gyazo from './gyazo';
-import { renderPage, saveJson } from 'app/renderScrapboxPage';
-
-import { sleep } from 'app/utils/utils';
-import * as dotenv from 'dotenv';
+import fs from 'fs';
+import path from 'path';
 import type { PDFPageProxy } from 'pdfjs-dist';
 import Bottleneck from 'bottleneck';
 import cliProgress from 'cli-progress';
+import * as dotenv from 'dotenv';
 
-import fs from 'fs';
-import path from 'path';
+import { sleep } from 'app/utils/utils';
+import { getFileInfo, mkdir } from 'app/utils/file';
+
+import { generateImageFromPDF, readPDF } from 'app/pdf';
+import * as Gyazo from './gyazo';
+import { renderPage, saveJson } from 'app/renderScrapboxPage';
+import { ProfilePath, createProfilePage } from 'app/profilePage';
 
 dotenv.config();
 
@@ -18,6 +19,7 @@ type Config = {
   scale: number;
   waitTimeForOcr: number; // GyazoにアップロードしてからOCRが生成されるまでの待機時間(ms)
   dir: string;
+  profile?: ProfilePath;
 };
 
 export async function main(config: Config) {
@@ -60,9 +62,16 @@ async function processSinglePDF(config: Config, filepath: string) {
     ),
   );
 
+  const pagesWithProfile = await (async () => {
+    if (config.profile == null) return pages;
+
+    const profilePage = await createProfilePage(config.profile);
+    return [...pages, profilePage];
+  })();
+
   progressBar.stop();
 
-  await saveJson(`out/${filename}-ocr.json`, { pages });
+  await saveJson(`out/${filename}-ocr.json`, { pages: pagesWithProfile });
 
   console.log(`Finished processing PDF: ${filename}\n`);
 }
