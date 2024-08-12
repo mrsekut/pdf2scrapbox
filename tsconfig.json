@@ -1,17 +1,16 @@
 {
   "compilerOptions": {
     "sourceMap": true,
-    "module": "commonjs",
-    "target": "es6",
+    "module": "Node16",
+    "moduleResolution": "Node16",
+    "target": "ESNext",
     "typeRoots": ["types", "node_modules/@types"],
     "baseUrl": "src",
     "paths": {
-      "app/*": ["./*"],
-      "fast-json-stable-stringify": ["src/types/fast-json-stable-stringify"]
+      "app/*": ["./*"]
     },
-    "moduleResolution": "node",
     "esModuleInterop": true,
-    "lib": ["ES2019"],
+    "lib": ["ESNext"],
     "experimentalDecorators": true,
     "allowJs": true,
     "allowSyntheticDefaultImports": true,

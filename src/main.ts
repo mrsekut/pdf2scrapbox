@@ -1,4 +1,4 @@
-import { main } from 'app/index';
+import { main } from 'app/index.js';
 
 const config = {
   scale: 300 / 72,

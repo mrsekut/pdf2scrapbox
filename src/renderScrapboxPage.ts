@@ -1,5 +1,5 @@
-import type { GyazoImageId } from 'app/gyazo';
-import { pad } from 'app/utils/utils';
+import type { GyazoImageId } from 'app/gyazo.js';
+import { pad } from 'app/utils/utils.js';
 import fs from 'fs/promises';
 
 type Project = {

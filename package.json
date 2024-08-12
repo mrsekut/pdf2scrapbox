@@ -2,11 +2,12 @@
   "name": "pdf2scrapbox",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "exports": "./index.js",
   "keywords": [],
   "author": "",
   "license": "ISC",
   "packageManager": "npm@9.2.0",
+  "type": "module",
   "scripts": {
     "main": "tsx src/main.ts",
     "tsc": "tsc",

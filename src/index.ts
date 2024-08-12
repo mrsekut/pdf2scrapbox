@@ -5,13 +5,13 @@ import Bottleneck from 'bottleneck';
 import cliProgress from 'cli-progress';
 import * as dotenv from 'dotenv';
 
-import { sleep } from 'app/utils/utils';
-import { getFileInfo, mkdir } from 'app/utils/file';
+import { sleep } from 'app/utils/utils.js';
+import { getFileInfo, mkdir } from 'app/utils/file.js';
 
-import { generateImageFromPDF, readPDF } from 'app/pdf';
-import * as Gyazo from './gyazo';
-import { renderPage, saveJson } from 'app/renderScrapboxPage';
-import { ProfilePath, createProfilePage } from 'app/profilePage';
+import { generateImageFromPDF, readPDF } from 'app/pdf.js';
+import * as Gyazo from './gyazo.js';
+import { renderPage, saveJson } from 'app/renderScrapboxPage.js';
+import { ProfilePath, createProfilePage } from 'app/profilePage.js';
 
 dotenv.config();
 

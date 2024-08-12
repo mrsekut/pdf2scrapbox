@@ -1,5 +1,5 @@
 import Gyazo from 'gyazo-api';
-import { withRetry } from 'app/utils/utils';
+import { withRetry } from 'app/utils/utils.js';
 
 import * as dotenv from 'dotenv';
 import * as v from 'valibot';
@@ -31,7 +31,7 @@ export async function upload(imagePath: string): Promise<GyazoImageId> {
 
   // TODO: any
   const res = await withRetry<any>(() => gyazo.upload(imagePath), {
-    maxRetries: 3,
+    maxRetries: 10,
     retryInterval: 1000,
   });
 
@@ -58,7 +58,7 @@ async function fetchImage(imageId: GyazoImageId): Promise<GyazoOCR> {
       return res.json();
     },
     {
-      maxRetries: 3,
+      maxRetries: 10,
       retryInterval: 1000,
     },
   );

@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { pad } from './utils';
+import { pad } from './utils.js';
 
 describe('pad', () => {
   test('pad', () => {

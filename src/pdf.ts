@@ -1,8 +1,8 @@
 import nodeCanvas from 'canvas';
-import { PDFPageProxy } from 'pdfjs-dist/types/src/display/api';
+import { PDFPageProxy } from 'pdfjs-dist/types/src/display/api.js';
 import fs from 'fs/promises';
 import * as pdfjs from 'pdfjs-dist/legacy/build/pdf.js';
-import { range } from './utils/utils';
+import { range } from './utils/utils.js';
 
 type ImagePath = string;
 
