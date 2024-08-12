@@ -19,6 +19,7 @@
     "arrowParens": "avoid"
   },
   "dependencies": {
+    "@mrsekut/utils": "npm:@jsr/mrsekut__utils@^0.1.2",
     "bottleneck": "^2.19.5",
     "canvas": "^2.11.2",
     "cli-progress": "^3.12.0",
