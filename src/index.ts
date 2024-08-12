@@ -1,6 +1,5 @@
 import fs from 'fs';
 import path from 'path';
-import type { PDFPageProxy } from 'pdfjs-dist';
 import Bottleneck from 'bottleneck';
 import cliProgress from 'cli-progress';
 import * as dotenv from 'dotenv';
@@ -8,7 +7,7 @@ import * as dotenv from 'dotenv';
 import { sleep } from 'app/utils/utils.js';
 import { getFileInfo, mkdir } from 'app/utils/file.js';
 
-import { generateImageFromPDF, readPDF } from 'app/pdf.js';
+import { readPDF } from 'app/pdf.js';
 import * as Gyazo from './gyazo.js';
 import { renderPage, saveJson } from 'app/renderScrapboxPage.js';
 import { ProfilePath, createProfilePage } from 'app/profilePage.js';
@@ -39,7 +38,7 @@ async function processSinglePDF(config: Config, filepath: string) {
 
   await mkdir(filename);
 
-  const pdfs = await readPDF(filepath);
+  const imgs = await readPDF(filepath);
 
   const limiter = new Bottleneck({
     maxConcurrent: 30,
@@ -51,13 +50,13 @@ async function processSinglePDF(config: Config, filepath: string) {
     cliProgress.Presets.shades_classic,
   );
 
-  progressBar.start(pdfs.length, 0);
+  progressBar.start(imgs.length, 0);
 
   const pages = await Promise.all(
-    pdfs.map((pdf, index) =>
+    imgs.map((img, index) =>
       limiter.schedule(() => {
         progressBar.increment();
-        return generatePage(pdf, filename, index, pdfs.length, config);
+        return generatePage(img, filename, index, imgs.length, config);
       }),
     ),
   );
@@ -77,7 +76,7 @@ async function processSinglePDF(config: Config, filepath: string) {
 }
 
 const generatePage = async (
-  pdf: PDFPageProxy,
+  img: Buffer,
   filename: string,
   index: number,
   pageLength: number,
@@ -85,7 +84,7 @@ const generatePage = async (
 ) => {
   const path = `out/${filename}/${index}.jpg`;
 
-  const imagePath = await generateImageFromPDF(pdf, config.scale, path);
+  const imagePath = await saveFiles(img, path);
   const gyazoImageId = await Gyazo.upload(imagePath);
 
   await sleep(config.waitTimeForOcr);
