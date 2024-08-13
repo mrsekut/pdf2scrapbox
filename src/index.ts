@@ -7,7 +7,7 @@ import * as dotenv from 'dotenv';
 import { sleep } from 'app/utils/utils.js';
 import { getFileInfo, mkdir } from 'app/utils/file.js';
 
-import { readPDF } from 'app/pdf.js';
+import { readPDF, saveFiles } from 'app/pdf.js';
 import * as Gyazo from './gyazo.js';
 import { renderPage, saveJson } from 'app/renderScrapboxPage.js';
 import { ProfilePath, createProfilePage } from 'app/profilePage.js';
