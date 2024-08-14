@@ -1,11 +1,10 @@
-import fs from 'node:fs';
 import path from 'node:path';
 import Bottleneck from 'bottleneck';
 import cliProgress from 'cli-progress';
 import * as dotenv from 'dotenv';
 
 import { sleep } from 'app/utils/utils.js';
-import { getFileInfo, mkdir } from 'app/utils/file.js';
+import { getFileInfo, getPDFs, mkdir } from 'app/utils/file.js';
 
 import { readPDF, saveFiles } from 'app/pdf.js';
 import * as Gyazo from './gyazo.js';
@@ -22,8 +21,7 @@ type Config = {
 };
 
 export async function main(config: Config) {
-  const files = fs.readdirSync(config.workspace);
-  const pdfs = files.filter(file => path.extname(file) === '.pdf');
+  const pdfs = await getPDFs(config.workspace);
 
   for (const pdf of pdfs) {
     const filepath = path.join(config.workspace, pdf);
