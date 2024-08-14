@@ -27,7 +27,7 @@ const fetchPageDetail = async (
     throw new Error('Failed to fetch Profile Page');
   }
 
-  return res.json();
+  return res.json() as Promise<PageDetail>;
 };
 
 type PageDetail = {
