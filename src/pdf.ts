@@ -1,4 +1,4 @@
-import fs from 'fs/promises';
+import fs from 'node:fs/promises';
 import { pdf } from 'pdf-to-img';
 import { range } from './utils/utils.js';
 
