@@ -81,6 +81,7 @@ const generatePage = async (
   pageLength: number,
   config: Config,
 ) => {
+  // TODO: out
   const path = `out/${filename}/${index}.jpg`;
 
   const imagePath = await saveFiles(img, path);
