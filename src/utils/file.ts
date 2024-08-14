@@ -22,6 +22,25 @@ export const getImageDirs = async (path: Path): Promise<Path[]> => {
 
 type Extension = '.json' | '.pdf';
 
+/**
+ * e.g. fileInfo('out/2021-01-01/2021-01-01.pdf')
+ * - path: 'out/2021-01-01/2021-01-01.pdf',
+ * - dir: 'out/2021-01-01',
+ * - name: '2021-01-01.pdf',
+ * - filename: '2021-01-01',
+ * - ext: '.pdf',
+ */
+export function fileInfo(path: Path) {
+  return {
+    path: path,
+    dir: np.dirname(path),
+    name: np.basename(path),
+    filename: np.basename(path, np.extname(path)),
+    ext: np.extname(path),
+  };
+}
+
+/** @deprecated */
 export function getFileInfo(filepath: Path, extension: Extension) {
   if (filepath === '') {
     throw new Error('invalid argument');
