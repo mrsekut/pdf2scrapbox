@@ -1,6 +1,6 @@
 import type { GyazoImageId } from 'app/gyazo.js';
 import { pad } from 'app/utils/utils.js';
-import fs from 'fs/promises';
+import fs from 'node:fs/promises';
 
 type Project = {
   pages: Page[];
