@@ -24,16 +24,12 @@ export const getImageDirs = async (dirPath: string): Promise<string[]> => {
   return dirs.filter(d => d != null);
 };
 
+export const getImages = async (path: Path): Promise<Path[]> => {
   const files = await fs.readdir(path);
   return files
-    .filter(async file => {
-      const stats = await fs.lstat(np.join(path, file));
-      return stats.isDirectory();
-    })
+    .filter(file => np.extname(file) === '.jpg' || np.extname(file) === '.png')
     .map(file => np.join(path, file));
 };
-
-type Extension = '.json' | '.pdf';
 
 /**
  * e.g. fileInfo('out/2021-01-01/2021-01-01.pdf')
@@ -50,18 +46,6 @@ export function fileInfo(path: Path) {
     name: np.basename(path),
     filename: np.basename(path, np.extname(path)),
     ext: np.extname(path),
-  };
-}
-
-/** @deprecated */
-export function getFileInfo(filepath: Path, extension: Extension) {
-  if (filepath === '') {
-    throw new Error('invalid argument');
-  }
-
-  return {
-    filepath,
-    filename: np.basename(filepath, extension),
   };
 }
 
