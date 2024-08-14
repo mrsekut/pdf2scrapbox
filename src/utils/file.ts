@@ -1,19 +1,23 @@
 import fs from 'node:fs/promises';
-import path from 'node:path';
+import np from 'node:path';
 
 export type Path = string;
 
-export const getPDFs = async (path_: Path) => {
-  const files = await fs.readdir(path_);
-  return files.filter(file => path.extname(file) === '.pdf');
+export const getPDFs = async (path: Path): Promise<Path[]> => {
+  const files = await fs.readdir(path);
+  return files
+    .filter(file => np.extname(file) === '.pdf')
+    .map(file => np.join(path, file));
 };
 
-export const getImageDirs = async (path_: Path) => {
-  const files = await fs.readdir(path_);
-  return files.filter(async file => {
-    const stats = await fs.lstat(path.join(path_, file));
-    return stats.isDirectory();
-  });
+export const getImageDirs = async (path: Path): Promise<Path[]> => {
+  const files = await fs.readdir(path);
+  return files
+    .filter(async file => {
+      const stats = await fs.lstat(np.join(path, file));
+      return stats.isDirectory();
+    })
+    .map(file => np.join(path, file));
 };
 
 type Extension = '.json' | '.pdf';
@@ -25,15 +29,18 @@ export function getFileInfo(filepath: Path, extension: Extension) {
 
   return {
     filepath,
-    filename: path.basename(filepath, extension),
+    filename: np.basename(filepath, extension),
   };
 }
 
-// TODO: out
-export async function mkdir(filename: string) {
+/**
+ * e.g. mkdir('out')
+ * e.g. mkdir('out/2021-01-01')
+ */
+export async function mkdir(name: string) {
   try {
-    await fs.stat(`out/${filename}`);
+    await fs.stat(name);
   } catch {
-    await fs.mkdir(`out/${filename}`, { recursive: true });
+    await fs.mkdir(name, { recursive: true });
   }
 }
