@@ -1,4 +1,5 @@
 import * as dotenv from 'dotenv';
+import cp from 'cli-progress';
 
 import { sleep } from 'app/utils/utils.js';
 import { Path, getImageDirs, getImages, getPDFs } from 'app/utils/file.js';
@@ -6,6 +7,7 @@ import { pdfs2images } from 'app/pdf.js';
 import * as Gyazo from './gyazo.js';
 import { renderPage, saveJson } from 'app/renderScrapboxPage.js';
 import { ProfilePath, createProfilePage } from 'app/profilePage.js';
+import Bottleneck from 'bottleneck';
 
 dotenv.config();
 
@@ -16,7 +18,6 @@ type Config = {
   profile?: ProfilePath;
 };
 
-// TODO: log
 export async function main(config: Config) {
   const pdfPaths = await getPDFs(config.workspace);
   await pdfs2images(pdfPaths, config.workspace);
@@ -30,11 +31,20 @@ async function dirs2Cosense(config: Config, dirPaths: Path[]) {
 }
 
 async function dir2Cosense(config: Config, dirPath: Path) {
+  const limiter = new Bottleneck({ maxConcurrent: 30, minTime: 1000 });
+  const progressBar = new cp.SingleBar({}, cp.Presets.shades_classic);
+
+  console.log(`imgs→cosense: start ${dirPath}\n`);
   const images = await getImages(dirPath);
+  progressBar.start(images.length, 0);
+
   const pages = await Promise.all(
-    images.map((img, index) => {
-      return generatePage(img, index, images.length, config);
-    }),
+    images.map((img, index) =>
+      limiter.schedule(() => {
+        progressBar.increment();
+        return generatePage(img, index, images.length, config);
+      }),
+    ),
   );
 
   const pagesWithProfile = await (async () => {
@@ -45,6 +55,9 @@ async function dir2Cosense(config: Config, dirPath: Path) {
   })();
 
   await saveJson(`${dirPath}-ocr.json`, { pages: pagesWithProfile });
+
+  progressBar.stop();
+  console.log(`imgs→cosense: end ${dirPath}\n`);
 }
 
 const generatePage = async (
