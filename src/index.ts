@@ -1,12 +1,19 @@
-import path from 'node:path';
+import np from 'node:path';
 import Bottleneck from 'bottleneck';
 import cliProgress from 'cli-progress';
 import * as dotenv from 'dotenv';
 
 import { sleep } from 'app/utils/utils.js';
-import { getFileInfo, getPDFs, mkdir } from 'app/utils/file.js';
+import {
+  Path,
+  fileInfo,
+  getFileInfo,
+  getImageDirs,
+  getPDFs,
+  mkdir,
+} from 'app/utils/file.js';
 
-import { readPDF, saveFiles } from 'app/pdf.js';
+import { pdfToImages, pdfs2images, saveFiles } from 'app/pdf.js';
 import * as Gyazo from './gyazo.js';
 import { renderPage, saveJson } from 'app/renderScrapboxPage.js';
 import { ProfilePath, createProfilePage } from 'app/profilePage.js';
@@ -21,76 +28,96 @@ type Config = {
 };
 
 export async function main(config: Config) {
-  const pdfs = await getPDFs(config.workspace);
+  const pdfPaths = await getPDFs(config.workspace);
+  await pdfs2images(pdfPaths, config.workspace);
 
-  for (const pdf of pdfs) {
-    const filepath = path.join(config.workspace, pdf);
-    await processSinglePDF(config, filepath);
-  }
+  // const dirs = await getImageDirs(config.inputs);
+
+  // const images = [ss, ...dirs];
+  // console.log({ images });
+
+  // for (const pdf of images) {
+  //   const filepath = path.join(config.inputs, pdf);
+  //   console.log({ filepath });
+  //   // await processSinglePDF(config, filepath);
+  // }
 }
 
-async function processSinglePDF(config: Config, filepath: string) {
-  const { filename } = getFileInfo(filepath, '.pdf');
+// // TODO: name, move
+// async function createCosenseJson(config: Config, dirpath: string) {
+//   const pages = await Promise.all(
+//     imgs.map((img, index) =>
+//       limiter.schedule(() => {
+//         progressBar.increment();
+//         return generatePage(img, filename, index, imgs.length, config);
+//       }),
+//     ),
+//   );
+//   //
+// }
 
-  console.log(`\nProcessing PDF: ${filename}\n`);
+// async function processSinglePDF(config: Config, filepath: string) {
+//   const { filename } = getFileInfo(filepath, '.pdf');
 
-  await mkdir(filename);
+//   console.log(`\nProcessing PDF: ${filename}\n`);
 
-  const imgs = await readPDF(filepath);
+//   await mkdir(filename);
 
-  const limiter = new Bottleneck({
-    maxConcurrent: 30,
-    minTime: 1000,
-  });
+//   const imgs = await pdfToImages(filepath);
 
-  const progressBar = new cliProgress.SingleBar(
-    {},
-    cliProgress.Presets.shades_classic,
-  );
+//   const limiter = new Bottleneck({
+//     maxConcurrent: 30,
+//     minTime: 1000,
+//   });
 
-  progressBar.start(imgs.length, 0);
+//   const progressBar = new cliProgress.SingleBar(
+//     {},
+//     cliProgress.Presets.shades_classic,
+//   );
 
-  const pages = await Promise.all(
-    imgs.map((img, index) =>
-      limiter.schedule(() => {
-        progressBar.increment();
-        return generatePage(img, filename, index, imgs.length, config);
-      }),
-    ),
-  );
+//   progressBar.start(imgs.length, 0);
 
-  const pagesWithProfile = await (async () => {
-    if (config.profile == null) return pages;
+//   const pages = await Promise.all(
+//     imgs.map((img, index) =>
+//       limiter.schedule(() => {
+//         progressBar.increment();
+//         return generatePage(img, filename, index, imgs.length, config);
+//       }),
+//     ),
+//   );
 
-    const profilePage = await createProfilePage(config.profile);
-    return [...pages, profilePage];
-  })();
+//   const pagesWithProfile = await (async () => {
+//     if (config.profile == null) return pages;
 
-  progressBar.stop();
+//     const profilePage = await createProfilePage(config.profile);
+//     return [...pages, profilePage];
+//   })();
 
-  // TODO: out
-  await saveJson(`out/${filename}-ocr.json`, { pages: pagesWithProfile });
+//   progressBar.stop();
 
-  console.log(`Finished processing PDF: ${filename}\n`);
-}
+//   // TODO: out
+//   await saveJson(`out/${filename}-ocr.json`, { pages: pagesWithProfile });
 
-const generatePage = async (
-  img: Buffer,
-  filename: string,
-  index: number,
-  pageLength: number,
-  config: Config,
-) => {
-  // TODO: out
-  const path = `out/${filename}/${index}.jpg`;
+//   console.log(`Finished processing PDF: ${filename}\n`);
+// }
 
-  const imagePath = await saveFiles(img, path);
-  const gyazoImageId = await Gyazo.upload(imagePath);
+// const generatePage = async (
+//   img: Buffer,
+//   filename: string,
+//   index: number,
+//   pageLength: number,
+//   config: Config,
+// ) => {
+//   // TODO: out
+//   const path = `out/${filename}/${index}.jpg`;
 
-  await sleep(config.waitTimeForOcr);
+//   const imagePath = await saveFiles(img, path);
+//   const gyazoImageId = await Gyazo.upload(imagePath);
 
-  const ocr = await Gyazo.getGyazoOCR(gyazoImageId);
-  const page = renderPage(index, pageLength, gyazoImageId, ocr);
+//   await sleep(config.waitTimeForOcr);
 
-  return page;
-};
+//   const ocr = await Gyazo.getGyazoOCR(gyazoImageId);
+//   const page = renderPage(index, pageLength, gyazoImageId, ocr);
+
+//   return page;
+// };
