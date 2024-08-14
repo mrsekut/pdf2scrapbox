@@ -17,16 +17,16 @@ dotenv.config();
 type Config = {
   scale: number;
   waitTimeForOcr: number; // GyazoにアップロードしてからOCRが生成されるまでの待機時間(ms)
-  dir: string;
+  workspace: string;
   profile?: ProfilePath;
 };
 
 export async function main(config: Config) {
-  const files = fs.readdirSync(config.dir);
+  const files = fs.readdirSync(config.workspace);
   const pdfs = files.filter(file => path.extname(file) === '.pdf');
 
   for (const pdf of pdfs) {
-    const filepath = path.join(config.dir, pdf);
+    const filepath = path.join(config.workspace, pdf);
     await processSinglePDF(config, filepath);
   }
 }
@@ -70,6 +70,7 @@ async function processSinglePDF(config: Config, filepath: string) {
 
   progressBar.stop();
 
+  // TODO: out
   await saveJson(`out/${filename}-ocr.json`, { pages: pagesWithProfile });
 
   console.log(`Finished processing PDF: ${filename}\n`);
