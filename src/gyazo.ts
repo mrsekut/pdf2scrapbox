@@ -76,5 +76,4 @@ declare global {
   function fetch(input: RequestInfo | URL): Promise<Response>;
 
   type RequestInfo = any;
-  type Response = any;
 }
