@@ -1,12 +1,14 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-export const getPDFs = async (path_: string) => {
+export type Path = string;
+
+export const getPDFs = async (path_: Path) => {
   const files = await fs.readdir(path_);
   return files.filter(file => path.extname(file) === '.pdf');
 };
 
-export const getImageDirs = async (path_: string) => {
+export const getImageDirs = async (path_: Path) => {
   const files = await fs.readdir(path_);
   return files.filter(async file => {
     const stats = await fs.lstat(path.join(path_, file));
@@ -16,7 +18,7 @@ export const getImageDirs = async (path_: string) => {
 
 type Extension = '.json' | '.pdf';
 
-export function getFileInfo(filepath: string, extension: Extension) {
+export function getFileInfo(filepath: Path, extension: Extension) {
   if (filepath === '') {
     throw new Error('invalid argument');
   }
