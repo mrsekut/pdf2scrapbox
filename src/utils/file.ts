@@ -27,6 +27,7 @@ export function getFileInfo(filepath: string, extension: Extension) {
   };
 }
 
+// TODO: out
 export async function mkdir(filename: string) {
   try {
     await fs.stat(`out/${filename}`);
