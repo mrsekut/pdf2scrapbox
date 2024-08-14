@@ -10,7 +10,20 @@ export const getPDFs = async (path: Path): Promise<Path[]> => {
     .map(file => np.join(path, file));
 };
 
-export const getImageDirs = async (path: Path): Promise<Path[]> => {
+export const getImageDirs = async (dirPath: string): Promise<string[]> => {
+  const files = await fs.readdir(dirPath);
+
+  const dirs = await Promise.all(
+    files.map(async file => {
+      const fullPath = np.join(dirPath, file);
+      const stats = await fs.lstat(fullPath);
+      return stats.isDirectory() ? fullPath : null;
+    }),
+  );
+
+  return dirs.filter(d => d != null);
+};
+
   const files = await fs.readdir(path);
   return files
     .filter(async file => {
