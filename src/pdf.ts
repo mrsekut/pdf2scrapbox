@@ -18,6 +18,8 @@ export async function pdfs2images(
  * - save to outDir
  */
 async function pdf2images(pdf: Path, outDir: string): Promise<Path> {
+  console.log(`pdf→images: start ${pdf}\n`);
+
   const { filename } = fileInfo(pdf);
   const outPath = np.join(outDir, filename);
   const imgs = await pdfToImages(pdf);
@@ -28,6 +30,7 @@ async function pdf2images(pdf: Path, outDir: string): Promise<Path> {
     imgs.map((img, index) => saveFiles(img, `${outPath}/${index}.jpg`)),
   );
 
+  console.log(`pdf→images: end ${pdf}\n`);
   return outPath;
 }
 
