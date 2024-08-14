@@ -28,7 +28,8 @@ export const getImages = async (path: Path): Promise<Path[]> => {
   const files = await fs.readdir(path);
   return files
     .filter(file => np.extname(file) === '.jpg' || np.extname(file) === '.png')
-    .map(file => np.join(path, file));
+    .map(file => np.join(path, file))
+    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
 };
 
 /**
