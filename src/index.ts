@@ -27,7 +27,9 @@ export async function main(config: Config) {
 }
 
 async function dirs2Cosense(config: Config, dirPaths: Path[]) {
-  Promise.all(dirPaths.map(dirPath => dir2Cosense(config, dirPath)));
+  for (const dirPath of dirPaths) {
+    await dir2Cosense(config, dirPath);
+  }
 }
 
 async function dir2Cosense(config: Config, dirPath: Path) {
