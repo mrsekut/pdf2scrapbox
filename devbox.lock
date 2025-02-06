@@ -1,0 +1,197 @@
+{
+  "lockfile_version": "1",
+  "packages": {
+    "cargo@latest": {
+      "last_modified": "2025-01-19T08:16:51Z",
+      "resolved": "github:NixOS/nixpkgs/50165c4f7eb48ce82bd063e1fb8047a0f515f8ce#cargo",
+      "source": "devbox-search",
+      "version": "1.83.0",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/ivrvbcih28j6nqd3dhl4hsb95nrfmi4c-cargo-1.83.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/ivrvbcih28j6nqd3dhl4hsb95nrfmi4c-cargo-1.83.0"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/zfbr6c6qqpiqfqsms2133s3la5z1v7ac-cargo-1.83.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/zfbr6c6qqpiqfqsms2133s3la5z1v7ac-cargo-1.83.0"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/xd628z5gs5dydb97s4fnc5wasyr8arlb-cargo-1.83.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/xd628z5gs5dydb97s4fnc5wasyr8arlb-cargo-1.83.0"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/a9n2kybksza6sn71qwqc6ac781gk9g7v-cargo-1.83.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/a9n2kybksza6sn71qwqc6ac781gk9g7v-cargo-1.83.0"
+        }
+      }
+    },
+    "libiconv@2.40": {
+      "last_modified": "2025-01-19T08:16:51Z",
+      "resolved": "github:NixOS/nixpkgs/50165c4f7eb48ce82bd063e1fb8047a0f515f8ce#libiconv",
+      "source": "devbox-search",
+      "version": "2.40",
+      "systems": {
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/5c7kszb0kagnbw31wwdhn0jkn7x8mw57-glibc-iconv-2.40",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/5c7kszb0kagnbw31wwdhn0jkn7x8mw57-glibc-iconv-2.40"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/ljxflkd92m8mn42mxbab381q8d8ygc6q-glibc-iconv-2.40",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/ljxflkd92m8mn42mxbab381q8d8ygc6q-glibc-iconv-2.40"
+        }
+      }
+    },
+    "mupdf@1.25.2": {
+      "last_modified": "2025-01-31T04:26:24Z",
+      "resolved": "github:NixOS/nixpkgs/9189ac18287c599860e878e905da550aa6dec1cd#mupdf",
+      "source": "devbox-search",
+      "version": "1.25.2",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "bin",
+              "path": "/nix/store/2hz0bgxjkkpfp2vaf33hfhs6a6iqlqc6-mupdf-1.25.2-bin",
+              "default": true
+            },
+            {
+              "name": "man",
+              "path": "/nix/store/n0jni04ixjpzv6x5znrcky1iaqw1czra-mupdf-1.25.2-man",
+              "default": true
+            },
+            {
+              "name": "dev",
+              "path": "/nix/store/p8ip1fvhbr4dbzq4anbsni52yvd1nid1-mupdf-1.25.2-dev"
+            },
+            {
+              "name": "doc",
+              "path": "/nix/store/pi447rdvpda80kkf86pswpl74nzxh6xw-mupdf-1.25.2-doc"
+            },
+            {
+              "name": "out",
+              "path": "/nix/store/75j89x03wl164xd3c6qans8flznksf40-mupdf-1.25.2"
+            }
+          ],
+          "store_path": "/nix/store/2hz0bgxjkkpfp2vaf33hfhs6a6iqlqc6-mupdf-1.25.2-bin"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "bin",
+              "path": "/nix/store/n1l4swwadrn1m1ccbi37dxc1fwcqy8kg-mupdf-1.25.2-bin",
+              "default": true
+            },
+            {
+              "name": "man",
+              "path": "/nix/store/3fyh512yldcdar6r2dg2qkjy3afqgmmy-mupdf-1.25.2-man",
+              "default": true
+            },
+            {
+              "name": "dev",
+              "path": "/nix/store/na7w35bpwvfnd45cbmnkc2qmxvp1i7wn-mupdf-1.25.2-dev"
+            },
+            {
+              "name": "doc",
+              "path": "/nix/store/2vrx90pv5s88j62w5kv7z8cfqxyiw5f8-mupdf-1.25.2-doc"
+            },
+            {
+              "name": "out",
+              "path": "/nix/store/xsxrbrgnhix9b65rs82rcvvdnpmkvda9-mupdf-1.25.2"
+            }
+          ],
+          "store_path": "/nix/store/n1l4swwadrn1m1ccbi37dxc1fwcqy8kg-mupdf-1.25.2-bin"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "bin",
+              "path": "/nix/store/ck31a5zqj79qik8jfklgfqvi42p0n4j9-mupdf-1.25.2-bin",
+              "default": true
+            },
+            {
+              "name": "man",
+              "path": "/nix/store/041adgwk5v287l58xckyxck32142yadq-mupdf-1.25.2-man",
+              "default": true
+            },
+            {
+              "name": "out",
+              "path": "/nix/store/zvwzf8kz35kgv2bza80cdsdfszl6n5ad-mupdf-1.25.2"
+            },
+            {
+              "name": "dev",
+              "path": "/nix/store/w377v4ck42d1hx2n44c0frr865jxyk8i-mupdf-1.25.2-dev"
+            },
+            {
+              "name": "doc",
+              "path": "/nix/store/5yvn4117glrxcnp32ai23l46scppk7pj-mupdf-1.25.2-doc"
+            }
+          ],
+          "store_path": "/nix/store/ck31a5zqj79qik8jfklgfqvi42p0n4j9-mupdf-1.25.2-bin"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "bin",
+              "path": "/nix/store/8p4ydchahiickws4yad48r1dsdp0sryy-mupdf-1.25.2-bin",
+              "default": true
+            },
+            {
+              "name": "man",
+              "path": "/nix/store/6jxz0aqb41va05hdrqr9zydi01b492j0-mupdf-1.25.2-man",
+              "default": true
+            },
+            {
+              "name": "dev",
+              "path": "/nix/store/g9cl7a56ln8040a8m31aamfbizk3cwdx-mupdf-1.25.2-dev"
+            },
+            {
+              "name": "doc",
+              "path": "/nix/store/lilsarr9x6hm2j7wcwdm0q0jjx1irigj-mupdf-1.25.2-doc"
+            },
+            {
+              "name": "out",
+              "path": "/nix/store/1a40hsy88f07ry5khx8i8s5z28pi0nlj-mupdf-1.25.2"
+            }
+          ],
+          "store_path": "/nix/store/8p4ydchahiickws4yad48r1dsdp0sryy-mupdf-1.25.2-bin"
+        }
+      }
+    }
+  }
+}
