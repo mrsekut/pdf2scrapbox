@@ -5,14 +5,8 @@ node_modules
 .direnv/
 .envrc
 
-*.jpg
-*.png
-*.pdf
-*.json
-
 .DS_Store
 
-workspaces/*
-!workspaces/.gitkeep
+/workspace/*
 
 /target
