@@ -1,8 +1,15 @@
 {
-  "editor.formatOnType": true,
-  "editor.formatOnPaste": true,
-  "editor.formatOnSave": true,
-  "editor.tabSize": 2,
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "typescript.preferences.importModuleSpecifier": "non-relative"
+	"editor.formatOnType": true,
+	"editor.formatOnPaste": true,
+	"editor.formatOnSave": true,
+	"editor.tabSize": 2,
+	"editor.defaultFormatter": "esbenp.prettier-vscode",
+	"typescript.preferences.importModuleSpecifier": "non-relative",
+	"terminal.integrated.profiles.osx": {
+		"devboxCompatibleShell": {
+			"path": "/bin/zsh",
+			"args": []
+		}
+	},
+	"terminal.integrated.defaultProfile.osx": "devboxCompatibleShell"
 }
