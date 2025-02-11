@@ -17,32 +17,32 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         profile: Some("mrsekut-merry-firends/mrsekut".to_string()),
     };
 
-    let pdfs = get_pdf_paths(&config.workspace_dir)?;
-
-    match pdfs_to_images(pdfs, &config.workspace_dir).await {
+    let pdf_paths = get_pdf_paths(&config.workspace_dir)?;
+    match pdfs_to_images(pdf_paths, &config.workspace_dir).await {
         Ok(paths) => println!("Converted PDFs saved to {:?}", paths),
         Err(e) => eprintln!("Error: {:?}", e),
     };
 
-    // match generate_pages_for_all(pdfs, out_dir).await {
-    //     Ok(paths) => println!("Converted PDFs saved to {:?}", paths),
-    //     Err(e) => eprintln!("Error: {:?}", e),
-    // };
+    let dirs = get_image_dirs(&config.workspace_dir)?;
+    // dirs_to_cosense(&config, &dirs).await;
 
     Ok(())
 }
 
-// // TODO: name
-// async fn generate_pages_for_all(
-//     pdfs: Vec<PathBuf>,
-//     out_dir: &str,
+// async fn dirs_to_cosense(config: &Config, dir_paths: &[PathBuf]) {
+//     dir_paths.iter().for_each(|dir_path| {
+//         dir_to_cosense(config, dir_path);
+//     });
+// }
+
+// async fn dir_to_cosense(
+//     config: &Config,
+//     dir_path: &PathBuf,
 // ) -> Result<Vec<PathBuf>, Box<dyn std::error::Error>> {
 //     // loop: generate_pages
 // }
 
-// async fn generate_pages(
-//     pdf_path: PathBuf,
-//     out_dir: &str,
+// async fn generate_pages(// TODO:
 // ) -> Result<Vec<PathBuf>, Box<dyn std::error::Error>> {
 //     // dirから画像のリストを取得
 //     // loop: generate_pageを呼び出す
@@ -55,10 +55,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 //     page_num: usize,
 //     out_dir: &str,
 // ) -> Result<PathBuf, Box<dyn std::error::Error>> {
-//     // upload to gyazo
-//     // sleep
-//     // get ocr
-//     // render page
+//     let gyazo_image_id = gyazo_upload(path).await;
+//     sleep(Duration::from_millis(config.wait_time_for_ocr)).await;
+//     let ocr_text = get_gyazo_ocr(&gyazo_image_id).await;
+//     render_page(index, page_length, &gyazo_image_id, &ocr_text)
 // }
 
 // TODO: move
@@ -68,6 +68,23 @@ fn get_pdf_paths(path: &str) -> Result<Vec<PathBuf>, Box<dyn std::error::Error>>
             let path = entry.ok()?.path();
 
             if path.extension()?.eq_ignore_ascii_case("pdf") {
+                Some(path)
+            } else {
+                None
+            }
+        })
+        .collect::<Vec<PathBuf>>();
+
+    Ok(paths)
+}
+
+// TODO: move
+fn get_image_dirs(path: &str) -> Result<Vec<PathBuf>, Box<dyn std::error::Error>> {
+    let paths = fs::read_dir(path)?
+        .filter_map(|entry| {
+            let path = entry.ok()?.path();
+
+            if path.is_dir() {
                 Some(path)
             } else {
                 None
