@@ -1,8 +1,10 @@
 use std::{fs, path::PathBuf};
 mod pdfs_to_images;
+mod render_page;
 
 use futures::join;
 use pdfs_to_images::pdfs_to_images;
+use render_page::{render_page, Page};
 
 struct Config {
     wait_time_for_ocr: u64,
@@ -43,18 +45,15 @@ async fn dir_to_cosense(
     config: &Config,
     dir_path: &PathBuf,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    // ) -> Result<Vec<PathBuf>, Box<dyn std::error::Error>> {
-    let images = get_images(dir_path);
-    dbg!(images);
-    Ok(())
-    // let mut pages = Vec::new();
+    let images = get_images(dir_path)?;
+    let mut pages = Vec::new();
 
-    // for (index, image) in images.iter().enumerate() {
-    //     match generate_page(image.clone(), index, dir_path.to_str().unwrap()).await {
-    //         Ok(page) => pages.push(page),
-    //         Err(e) => eprintln!("Error processing image {:?}: {:?}", image, e),
-    //     }
-    // }
+    for (index, image) in images.iter().enumerate() {
+        match generate_page(image.clone(), index, dir_path.to_str().unwrap()).await {
+            Ok(page) => pages.push(page),
+            Err(e) => eprintln!("Error processing image {:?}: {:?}", image, e),
+        }
+    }
 
     // if let Some(profile) = &config.profile {
     //     let profile_page = create_profile_page(profile).await;
@@ -62,21 +61,26 @@ async fn dir_to_cosense(
     // }
 
     // save_json(&format!("{}-ocr.json", dir_path.display()), &pages).await;
-    // Ok(pages)
+    Ok(())
 }
 
-// async fn generate_page(
-//     pdf_path: PathBuf,
-//     page_num: usize,
-//     out_dir: &str,
-// ) -> Result<PathBuf, Box<dyn std::error::Error>> {
-//     dbg!("aaaaaaa");
-//     Ok(())
-//     // let gyazo_image_id = gyazo_upload(path).await;
-//     // sleep(Duration::from_millis(config.wait_time_for_ocr)).await;
-//     // let ocr_text = get_gyazo_ocr(&gyazo_image_id).await;
-//     // render_page(index, page_length, &gyazo_image_id, &ocr_text)
-// }
+async fn generate_page(
+    pdf_path: PathBuf,
+    page_num: usize,
+    out_dir: &str,
+) -> Result<Page, Box<dyn std::error::Error>> {
+    // let gyazo_image_id = gyazo_upload(path).await;
+    let gyazo_image_id = "b920f739470f378e44a765ee371eeb9c";
+
+    // sleep(Duration::from_millis(config.wait_time_for_ocr)).await;
+
+    // let ocr_text = get_gyazo_ocr(&gyazo_image_id).await;
+    let ocr_text = "aaaaaaaaaaaaaaaaaaa\nbbbbbbbbbbbbbbbbbbb\nccccccccccccccccccc";
+
+    let page = render_page(5, 100, &gyazo_image_id, ocr_text);
+
+    Ok(page)
+}
 
 // TODO: move
 fn get_pdf_paths(path: &str) -> Result<Vec<PathBuf>, Box<dyn std::error::Error>> {
@@ -112,6 +116,7 @@ fn get_image_dirs(path: &str) -> Result<Vec<PathBuf>, Box<dyn std::error::Error>
     Ok(paths)
 }
 
+// TODO: move
 fn get_images(path: &PathBuf) -> Result<Vec<PathBuf>, Box<dyn std::error::Error>> {
     let paths = fs::read_dir(path)?
         .filter_map(|entry| {
