@@ -4,7 +4,7 @@ mod render_page;
 
 use futures::join;
 use pdfs_to_images::pdfs_to_images;
-use render_page::{render_page, Page};
+use render_page::{render_page, save_json, Page, Project};
 
 struct Config {
     wait_time_for_ocr: u64,
@@ -41,6 +41,7 @@ async fn dirs_to_cosense(config: &Config, dir_paths: &[PathBuf]) {
     }
 }
 
+// TODO: clean
 async fn dir_to_cosense(
     config: &Config,
     dir_path: &PathBuf,
@@ -55,15 +56,18 @@ async fn dir_to_cosense(
         }
     }
 
+    let project = Project { pages };
+
     // if let Some(profile) = &config.profile {
     //     let profile_page = create_profile_page(profile).await;
     //     pages.push(profile_page);
     // }
 
-    // save_json(&format!("{}-ocr.json", dir_path.display()), &pages).await;
+    save_json(&format!("{}-ocr.json", dir_path.display()), &project);
     Ok(())
 }
 
+// TODO: impl
 async fn generate_page(
     pdf_path: PathBuf,
     page_num: usize,

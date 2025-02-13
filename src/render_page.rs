@@ -1,16 +1,28 @@
 use indoc::formatdoc;
 use serde::{Deserialize, Serialize};
+use std::fs::write;
+
+#[derive(Serialize, Deserialize)]
+pub struct Project {
+    pub pages: Vec<Page>,
+}
 
 #[derive(Serialize, Deserialize)]
 pub struct Page {
     title: String,
-    content: String,
+    lines: Vec<String>,
 }
 
 #[derive(Debug, Clone, Copy)]
 struct PageNum {
     prev: usize,
     next: usize,
+}
+
+pub fn save_json(file_path: &str, project: &Project) -> Result<(), Box<dyn std::error::Error>> {
+    let json_str = serde_json::to_string_pretty(project)?;
+    write(file_path, json_str)?;
+    Ok(())
 }
 
 pub fn render_page(
@@ -39,7 +51,10 @@ pub fn render_page(
         {ocr_lines}"
     };
 
-    Page { title, content }
+    Page {
+        title,
+        lines: content.lines().map(|s| s.to_string()).collect(),
+    }
 }
 
 fn page_num(current: usize) -> PageNum {
