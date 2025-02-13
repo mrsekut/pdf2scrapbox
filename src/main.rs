@@ -1,4 +1,7 @@
-use std::{fs, path::PathBuf};
+use std::{
+    fs,
+    path::{Path, PathBuf},
+};
 mod pdfs_to_images;
 mod render_page;
 
@@ -8,7 +11,7 @@ use render_page::{render_page, save_json, Page, Project};
 
 struct Config {
     wait_time_for_ocr: u64,
-    workspace_dir: String,
+    workspace_dir: PathBuf,
     profile: Option<String>,
 }
 
@@ -16,7 +19,7 @@ struct Config {
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let config = Config {
         wait_time_for_ocr: 10000,
-        workspace_dir: "./workspace".to_string(),
+        workspace_dir: "./workspace".into(),
         profile: Some("mrsekut-merry-firends/mrsekut".to_string()),
     };
 
@@ -63,7 +66,8 @@ async fn dir_to_cosense(
     //     pages.push(profile_page);
     // }
 
-    save_json(&format!("{}-ocr.json", dir_path.display()), &project);
+    let json_path = format!("{}-ocr.json", dir_path.display());
+    save_json(&Path::new(&json_path), &project);
     Ok(())
 }
 
@@ -87,7 +91,7 @@ async fn generate_page(
 }
 
 // TODO: move
-fn get_pdf_paths(path: &str) -> Result<Vec<PathBuf>, Box<dyn std::error::Error>> {
+fn get_pdf_paths(path: &PathBuf) -> Result<Vec<PathBuf>, Box<dyn std::error::Error>> {
     let paths = fs::read_dir(path)?
         .filter_map(|entry| {
             let path = entry.ok()?.path();
@@ -104,7 +108,7 @@ fn get_pdf_paths(path: &str) -> Result<Vec<PathBuf>, Box<dyn std::error::Error>>
 }
 
 // TODO: move
-fn get_image_dirs(path: &str) -> Result<Vec<PathBuf>, Box<dyn std::error::Error>> {
+fn get_image_dirs(path: &PathBuf) -> Result<Vec<PathBuf>, Box<dyn std::error::Error>> {
     let paths = fs::read_dir(path)?
         .filter_map(|entry| {
             let path = entry.ok()?.path();

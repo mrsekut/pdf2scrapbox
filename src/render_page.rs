@@ -1,6 +1,6 @@
 use indoc::formatdoc;
 use serde::{Deserialize, Serialize};
-use std::fs::write;
+use std::{fs::write, path::Path};
 
 #[derive(Serialize, Deserialize)]
 pub struct Project {
@@ -19,7 +19,7 @@ struct PageNum {
     next: usize,
 }
 
-pub fn save_json(file_path: &str, project: &Project) -> Result<(), Box<dyn std::error::Error>> {
+pub fn save_json(file_path: &Path, project: &Project) -> Result<(), Box<dyn std::error::Error>> {
     let json_str = serde_json::to_string_pretty(project)?;
     write(file_path, json_str)?;
     Ok(())
