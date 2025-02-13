@@ -1,11 +1,14 @@
 use std::{
     fs,
     path::{Path, PathBuf},
+    thread, time,
 };
 mod pdfs_to_images;
 mod render_page;
 
+use dotenv::dotenv;
 use futures::join;
+use gyazo_api::{upload::GyazoUploadOptions, Gyazo};
 use pdfs_to_images::pdfs_to_images;
 use render_page::{render_page, save_json, Page, Project};
 
@@ -17,8 +20,10 @@ struct Config {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    dotenv().ok();
+
     let config = Config {
-        wait_time_for_ocr: 10000,
+        wait_time_for_ocr: 5000,
         workspace_dir: "./workspace".into(),
         profile: Some("mrsekut-merry-firends/mrsekut".to_string()),
     };
@@ -53,7 +58,8 @@ async fn dir_to_cosense(
     let mut pages = Vec::new();
 
     for (index, image) in images.iter().enumerate() {
-        match generate_page(image.clone(), index, dir_path.to_str().unwrap()).await {
+        // TODO: 直列になっている
+        match generate_page(index, image.clone(), images.len(), config).await {
             Ok(page) => pages.push(page),
             Err(e) => eprintln!("Error processing image {:?}: {:?}", image, e),
         }
@@ -71,21 +77,29 @@ async fn dir_to_cosense(
     Ok(())
 }
 
-// TODO: impl
+// TODO: impl, clean
 async fn generate_page(
+    index: usize,
     pdf_path: PathBuf,
     page_num: usize,
-    out_dir: &str,
+    config: &Config,
 ) -> Result<Page, Box<dyn std::error::Error>> {
-    // let gyazo_image_id = gyazo_upload(path).await;
-    let gyazo_image_id = "b920f739470f378e44a765ee371eeb9c";
+    let gyazo_token = std::env::var("GYAZO_TOKEN").expect("GYAZO_ACCESS_TOKEN must be set");
+    let gyazo = Gyazo::new(gyazo_token);
 
-    // sleep(Duration::from_millis(config.wait_time_for_ocr)).await;
+    let options = GyazoUploadOptions {
+        ..Default::default()
+    };
+    let gyazo_image_id = gyazo.upload(pdf_path, Some(&options)).await?.image_id;
 
-    // let ocr_text = get_gyazo_ocr(&gyazo_image_id).await;
-    let ocr_text = "aaaaaaaaaaaaaaaaaaa\nbbbbbbbbbbbbbbbbbbb\nccccccccccccccccccc";
+    let five_sec = time::Duration::from_millis(config.wait_time_for_ocr);
+    thread::sleep(five_sec);
 
-    let page = render_page(5, 100, &gyazo_image_id, ocr_text);
+    // TODO: retry
+    let ocr_text = gyazo.image(&gyazo_image_id).await?.ocr.description;
+
+    let page = render_page(index, page_num, &gyazo_image_id, &ocr_text);
+    println!("done: {index}");
 
     Ok(page)
 }
