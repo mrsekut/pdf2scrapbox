@@ -1,16 +1,17 @@
+use dotenv::dotenv;
+use futures::future;
+use gyazo_api::{upload::GyazoUploadOptions, Gyazo};
+use pdfs_to_images::pdfs_to_images;
+use render_page::{render_page, save_json, Page, Project};
 use std::{
     fs,
     path::{Path, PathBuf},
     thread, time,
 };
+use tokio::task;
+
 mod pdfs_to_images;
 mod render_page;
-
-use dotenv::dotenv;
-use futures::join;
-use gyazo_api::{upload::GyazoUploadOptions, Gyazo};
-use pdfs_to_images::pdfs_to_images;
-use render_page::{render_page, save_json, Page, Project};
 
 struct Config {
     wait_time_for_ocr: u64,
@@ -49,29 +50,34 @@ async fn dirs_to_cosense(config: &Config, dir_paths: &[PathBuf]) {
     }
 }
 
-// TODO: clean
 async fn dir_to_cosense(
     config: &Config,
     dir_path: &PathBuf,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let images = get_images(dir_path)?;
-    let mut pages = Vec::new();
+    let wait_time_for_ocr = config.wait_time_for_ocr.clone();
+    let total_pages = images.len();
 
-    for (index, image) in images.iter().enumerate() {
-        // TODO: 直列になっている
-        match generate_page(index, image.clone(), images.len(), config).await {
-            Ok(page) => pages.push(page),
-            Err(e) => eprintln!("Error processing image {:?}: {:?}", image, e),
-        }
-    }
+    let tasks: Vec<_> = images
+        .into_iter()
+        .enumerate()
+        .map(|(index, image)| {
+            task::spawn(async move {
+                generate_page(index, image.clone(), total_pages, wait_time_for_ocr)
+                    .await
+                    .ok()
+            })
+        })
+        .collect();
+
+    let pages: Vec<Page> = future::join_all(tasks)
+        .await
+        .into_iter()
+        .filter_map(Result::ok)
+        .flatten()
+        .collect();
 
     let project = Project { pages };
-
-    // if let Some(profile) = &config.profile {
-    //     let profile_page = create_profile_page(profile).await;
-    //     pages.push(profile_page);
-    // }
-
     let json_path = format!("{}-ocr.json", dir_path.display());
     save_json(&Path::new(&json_path), &project);
     Ok(())
@@ -82,7 +88,7 @@ async fn generate_page(
     index: usize,
     pdf_path: PathBuf,
     page_num: usize,
-    config: &Config,
+    wait_time_for_ocr: u64,
 ) -> Result<Page, Box<dyn std::error::Error>> {
     let gyazo_token = std::env::var("GYAZO_TOKEN").expect("GYAZO_ACCESS_TOKEN must be set");
     let gyazo = Gyazo::new(gyazo_token);
@@ -92,7 +98,7 @@ async fn generate_page(
     };
     let gyazo_image_id = gyazo.upload(pdf_path, Some(&options)).await?.image_id;
 
-    let five_sec = time::Duration::from_millis(config.wait_time_for_ocr);
+    let five_sec = time::Duration::from_millis(wait_time_for_ocr);
     thread::sleep(five_sec);
 
     // TODO: retry
