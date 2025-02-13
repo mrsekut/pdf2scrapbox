@@ -11,5 +11,8 @@
 			"args": []
 		}
 	},
-	"terminal.integrated.defaultProfile.osx": "devboxCompatibleShell"
+	"terminal.integrated.defaultProfile.osx": "devboxCompatibleShell",
+	"[rust]": {
+		"editor.defaultFormatter": "rust-lang.rust-analyzer"
+	}
 }
