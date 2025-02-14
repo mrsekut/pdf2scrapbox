@@ -1,15 +1,16 @@
 use dotenv::dotenv;
+use files::{get_image_dirs, get_images, get_pdf_paths};
 use futures::future;
 use gyazo_api::{upload::GyazoUploadOptions, Gyazo};
 use pdfs_to_images::pdfs_to_images;
 use render_page::{create_profile_page, render_page, save_json, Page, Project};
 use std::{
-    fs,
     path::{Path, PathBuf},
-    thread, time, vec,
+    thread, time,
 };
 use tokio::task;
 
+mod files;
 mod pdfs_to_images;
 mod render_page;
 
@@ -29,11 +30,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         profile: Some("mrsekut-merry-firends/mrsekut".to_string()),
     };
 
-    // let pdf_paths = get_pdf_paths(&config.workspace_dir)?;
-    // match pdfs_to_images(pdf_paths, &config.workspace_dir).await {
-    //     Ok(paths) => println!("Converted PDFs saved to {:?}", paths),
-    //     Err(e) => eprintln!("Error: {:?}", e),
-    // };
+    let pdf_paths = get_pdf_paths(&config.workspace_dir)?;
+    match pdfs_to_images(pdf_paths, &config.workspace_dir).await {
+        Ok(paths) => println!("Converted PDFs saved to {:?}", paths),
+        Err(e) => eprintln!("Error: {:?}", e),
+    };
 
     let dirs = get_image_dirs(&config.workspace_dir)?;
     dirs_to_cosense(&config, &dirs).await;
@@ -118,55 +119,4 @@ async fn generate_page(
     println!("done: {index}");
 
     Ok(page)
-}
-
-// TODO: move
-fn get_pdf_paths(path: &PathBuf) -> Result<Vec<PathBuf>, Box<dyn std::error::Error>> {
-    let paths = fs::read_dir(path)?
-        .filter_map(|entry| {
-            let path = entry.ok()?.path();
-
-            if path.extension()?.eq_ignore_ascii_case("pdf") {
-                Some(path)
-            } else {
-                None
-            }
-        })
-        .collect::<Vec<PathBuf>>();
-
-    Ok(paths)
-}
-
-// TODO: move
-fn get_image_dirs(path: &PathBuf) -> Result<Vec<PathBuf>, Box<dyn std::error::Error>> {
-    let paths = fs::read_dir(path)?
-        .filter_map(|entry| {
-            let path = entry.ok()?.path();
-
-            if path.is_dir() {
-                Some(path)
-            } else {
-                None
-            }
-        })
-        .collect::<Vec<PathBuf>>();
-
-    Ok(paths)
-}
-
-// TODO: move
-fn get_images(path: &PathBuf) -> Result<Vec<PathBuf>, Box<dyn std::error::Error>> {
-    let paths = fs::read_dir(path)?
-        .filter_map(|entry| {
-            let path = entry.ok()?.path();
-
-            if path.extension()?.eq_ignore_ascii_case("png") {
-                Some(path)
-            } else {
-                None
-            }
-        })
-        .collect::<Vec<PathBuf>>();
-
-    Ok(paths)
 }
