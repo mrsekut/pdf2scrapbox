@@ -2,11 +2,11 @@ use dotenv::dotenv;
 use futures::future;
 use gyazo_api::{upload::GyazoUploadOptions, Gyazo};
 use pdfs_to_images::pdfs_to_images;
-use render_page::{render_page, save_json, Page, Project};
+use render_page::{create_profile_page, render_page, save_json, Page, Project};
 use std::{
     fs,
     path::{Path, PathBuf},
-    thread, time,
+    thread, time, vec,
 };
 use tokio::task;
 
@@ -36,7 +36,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // };
 
     let dirs = get_image_dirs(&config.workspace_dir)?;
-    dbg!(&dirs);
     dirs_to_cosense(&config, &dirs).await;
 
     Ok(())
@@ -77,7 +76,18 @@ async fn dir_to_cosense(
         .flatten()
         .collect();
 
-    let project = Project { pages };
+    let pages_with_profile = {
+        if let Some(profile) = &config.profile {
+            let profile = create_profile_page(profile).await?;
+            std::iter::once(profile).chain(pages.into_iter()).collect()
+        } else {
+            pages
+        }
+    };
+
+    let project = Project {
+        pages: pages_with_profile,
+    };
     let json_path = format!("{}-ocr.json", dir_path.display());
     save_json(&Path::new(&json_path), &project);
     Ok(())

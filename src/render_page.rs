@@ -63,3 +63,37 @@ fn page_num(current: usize) -> PageNum {
         next: current + 1,
     }
 }
+
+pub async fn create_profile_page(
+    cosense_profile_page: &str,
+) -> Result<Page, Box<dyn std::error::Error>> {
+    let page = fetch_page(cosense_profile_page).await?;
+    Ok(Page {
+        title: page.title,
+        lines: page
+            .lines
+            .iter()
+            .map(|line| line.text.clone())
+            .collect::<Vec<_>>(),
+    })
+}
+
+#[derive(Deserialize, Debug, Clone)]
+struct PageDetail {
+    title: String,
+    lines: Vec<Line>,
+    // and more...
+}
+
+#[derive(Deserialize, Debug, Clone)]
+struct Line {
+    text: String,
+    // and more...
+}
+
+async fn fetch_page(cosense_profile_page: &str) -> Result<PageDetail, Box<dyn std::error::Error>> {
+    let url = format!("https://scrapbox.io/api/pages/{cosense_profile_page}");
+    let res = reqwest::get(url).await?;
+    let page_detail = res.json::<PageDetail>().await?;
+    Ok(page_detail)
+}
