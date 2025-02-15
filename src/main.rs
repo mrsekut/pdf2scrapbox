@@ -6,31 +6,37 @@ use pdfs_to_images::pdfs_to_images;
 use render_page::{create_profile_page, render_page, save_json, Page, Project};
 use std::{
     path::{Path, PathBuf},
-    thread, time,
+    time::Duration,
 };
-use tokio::task;
+use tokio::{task, time::sleep};
 
 mod files;
 mod pdfs_to_images;
 mod render_page;
 
+#[derive(Clone)]
 struct Config {
-    wait_time_for_ocr: u64,
+    wait_time_for_ocr: Duration,
     workspace_dir: PathBuf,
     profile: Option<String>,
+}
+
+impl Config {
+    fn new() -> Result<Self, Box<dyn std::error::Error>> {
+        Ok(Self {
+            wait_time_for_ocr: Duration::from_millis(5000),
+            workspace_dir: PathBuf::from("./workspace"),
+            profile: Some("mrsekut-merry-firends/mrsekut".to_string()),
+        })
+    }
 }
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     dotenv().ok();
-
-    let config = Config {
-        wait_time_for_ocr: 5000,
-        workspace_dir: "./workspace".into(),
-        profile: Some("mrsekut-merry-firends/mrsekut".to_string()),
-    };
-
+    let config = Config::new()?;
     let pdf_paths = get_pdf_paths(&config.workspace_dir)?;
+
     match pdfs_to_images(pdf_paths, &config.workspace_dir).await {
         Ok(paths) => println!("Converted PDFs saved to {:?}", paths),
         Err(e) => eprintln!("Error: {:?}", e),
@@ -43,27 +49,28 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 async fn dirs_to_cosense(config: &Config, dir_paths: &[PathBuf]) {
-    for dir_path in dir_paths {
-        if let Err(e) = dir_to_cosense(config, dir_path).await {
-            eprintln!("Error processing {:?}: {:?}", dir_path, e);
-        }
-    }
+    let tasks: Vec<_> = dir_paths
+        .iter()
+        .map(|dir| dir_to_cosense(config, dir))
+        .collect();
+    future::join_all(tasks).await;
 }
 
+// TODO: clean, warning, cli, dos
 async fn dir_to_cosense(
     config: &Config,
     dir_path: &PathBuf,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let images = get_images(dir_path)?;
-    let wait_time_for_ocr = config.wait_time_for_ocr.clone();
     let total_pages = images.len();
 
     let tasks: Vec<_> = images
         .into_iter()
         .enumerate()
         .map(|(index, image)| {
+            let config = config.clone();
             task::spawn(async move {
-                generate_page(index, image.clone(), total_pages, wait_time_for_ocr)
+                generate_page(&config, index, image.clone(), total_pages)
                     .await
                     .ok()
             })
@@ -77,13 +84,11 @@ async fn dir_to_cosense(
         .flatten()
         .collect();
 
-    let pages_with_profile = {
-        if let Some(profile) = &config.profile {
-            let profile = create_profile_page(profile).await?;
-            std::iter::once(profile).chain(pages.into_iter()).collect()
-        } else {
-            pages
-        }
+    let pages_with_profile = if let Some(profile) = &config.profile {
+        let profile = create_profile_page(profile).await?;
+        std::iter::once(profile).chain(pages.into_iter()).collect()
+    } else {
+        pages
     };
 
     let project = Project {
@@ -94,29 +99,23 @@ async fn dir_to_cosense(
     Ok(())
 }
 
-// TODO: impl, clean
+// TODO: retry?
 async fn generate_page(
+    config: &Config,
     index: usize,
     pdf_path: PathBuf,
     page_num: usize,
-    wait_time_for_ocr: u64,
 ) -> Result<Page, Box<dyn std::error::Error>> {
+    let options = GyazoUploadOptions::default();
     let gyazo_token = std::env::var("GYAZO_TOKEN").expect("GYAZO_ACCESS_TOKEN must be set");
     let gyazo = Gyazo::new(gyazo_token);
-
-    let options = GyazoUploadOptions {
-        ..Default::default()
-    };
     let gyazo_image_id = gyazo.upload(pdf_path, Some(&options)).await?.image_id;
 
-    let five_sec = time::Duration::from_millis(wait_time_for_ocr);
-    thread::sleep(five_sec);
+    sleep(config.wait_time_for_ocr).await;
 
-    // TODO: retry
     let ocr_text = gyazo.image(&gyazo_image_id).await?.ocr.description;
-
     let page = render_page(index, page_num, &gyazo_image_id, &ocr_text);
-    println!("done: {index}");
 
+    println!("Processed page: {index}");
     Ok(page)
 }
