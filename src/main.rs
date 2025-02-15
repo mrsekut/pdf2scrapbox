@@ -60,7 +60,7 @@ async fn dirs_to_cosense(config: Arc<Config>, dir_paths: &[PathBuf]) {
     future::join_all(tasks).await;
 }
 
-// TODO: clean, warning, cli, dos
+// TODO: cli
 async fn dir_to_cosense(
     config: Arc<Config>,
     dir_path: &PathBuf,
@@ -99,11 +99,16 @@ async fn dir_to_cosense(
         pages: pages_with_profile,
     };
     let json_path = format!("{}-ocr.json", dir_path.display());
-    save_json(&Path::new(&json_path), &project);
+
+    match save_json(&Path::new(&json_path), &project) {
+        Ok(_) => println!("Saved JSON to {:?}", json_path),
+        Err(e) => eprintln!("Error: {:?}", e),
+    };
+
     Ok(())
 }
 
-// TODO: retry?
+// TODO: retry? rate limit?
 async fn generate_page(
     config: Arc<Config>,
     index: usize,
