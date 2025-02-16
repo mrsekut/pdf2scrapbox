@@ -931,7 +931,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "pdf2scrapbox"
+name = "pdf2cosense"
 version = "0.1.0"
 dependencies = [
  "dotenv",

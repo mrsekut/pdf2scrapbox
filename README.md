@@ -1,3 +1,3 @@
-# PDF2Scrapbox
+# PDF2Cosense
 
-- [PDF を Scrapbox に変換する](https://scrapbox.io/mrsekut-p/PDFをScrapboxに変換する)
+- [PDF を Cosense に変換する](https://scrapbox.io/mrsekut-p/PDFをCosenseに変換する)
