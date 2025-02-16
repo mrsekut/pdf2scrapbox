@@ -12,3 +12,4 @@ indoc = "2.0"
 dotenv = "0.15.0"
 gyazo-api = "0.2.0"
 reqwest = { version = "0.12.12", features = ["json"] }
+indicatif = "0.17.11"
