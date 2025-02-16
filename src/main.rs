@@ -84,7 +84,7 @@ async fn dir_to_cosense(
                 match generate_page(config, index, image.clone(), total_pages).await {
                     Ok(page) => {
                         pb.inc(1);
-                        Some(page)
+                        Some((index, page))
                     }
                     Err(_) => {
                         eprintln!("❌ Error on page {}/{}", index + 1, total_pages);
@@ -100,7 +100,9 @@ async fn dir_to_cosense(
         .into_iter()
         .filter_map(Result::ok)
         .flatten()
+        .map(|(_, page)| page)
         .collect();
+
     pb.finish_with_message(format!("✅ Finished processing {}", dir_path.display()));
 
     let pages_with_profile = if let Some(profile) = &config.profile {
@@ -130,17 +132,36 @@ async fn generate_page(
     pdf_path: PathBuf,
     page_num: usize,
 ) -> Result<Page, Box<dyn std::error::Error>> {
-    let options = GyazoUploadOptions::default();
-    let gyazo_image_id = config
-        .gyazo
-        .upload(pdf_path, Some(&options))
-        .await?
-        .image_id;
-
-    let ocr_text = fetch_ocr_text_with_retries(&config, &gyazo_image_id, 5).await?;
+    let gyazo_image_id = upload_image_with_retries(config.clone(), pdf_path, 5).await?;
+    let ocr_text = fetch_ocr_text_with_retries(&config, &gyazo_image_id, 10).await?;
 
     let page = render_page(index, page_num, &gyazo_image_id, &ocr_text);
     Ok(page)
+}
+
+async fn upload_image_with_retries(
+    config: Arc<Config>,
+    pdf_path: PathBuf,
+    max_attempts: usize,
+) -> Result<String, Box<dyn std::error::Error>> {
+    let options = GyazoUploadOptions::default();
+
+    for attempt in 1..=max_attempts {
+        match config.gyazo.upload(pdf_path.clone(), Some(&options)).await {
+            Ok(response) => return Ok(response.image_id),
+            Err(e) => {
+                eprintln!(
+                    "⚠️ Gyazo upload failed (attempt {}/{}): {:?}",
+                    attempt, max_attempts, e
+                );
+                if attempt < max_attempts {
+                    sleep(Duration::from_secs(3)).await;
+                }
+            }
+        }
+    }
+
+    Err("Failed to upload image to Gyazo after multiple attempts".into())
 }
 
 /// Attempt to fetch the OCR text with retries
@@ -149,14 +170,22 @@ async fn fetch_ocr_text_with_retries(
     gyazo_image_id: &str,
     max_attempts: usize,
 ) -> Result<String, Box<dyn std::error::Error>> {
-    for _ in 0..max_attempts {
-        sleep(Duration::from_millis(5000)).await;
-        if let Ok(image_data) = config.gyazo.image(gyazo_image_id).await {
-            let ocr_text = image_data.ocr.description;
-            if !ocr_text.trim().is_empty() {
-                return Ok(ocr_text);
+    for attempt in 1..=max_attempts {
+        sleep(Duration::from_secs(5)).await;
+        match config.gyazo.image(gyazo_image_id).await {
+            Ok(image_data) => {
+                let ocr_text = image_data.ocr.description;
+                if !ocr_text.trim().is_empty() {
+                    return Ok(ocr_text);
+                }
+            }
+            Err(e) => {
+                eprintln!(
+                    "⚠️ Gyazo OCR retrieval failed (attempt {}/{}): {:?}",
+                    attempt, max_attempts, e
+                );
             }
         }
     }
-    Err("Failed to retrieve OCR result".into())
+    Err("Failed to retrieve OCR result after multiple attempts".into())
 }

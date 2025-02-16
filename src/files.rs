@@ -33,7 +33,7 @@ pub fn get_image_dirs(path: &PathBuf) -> Result<Vec<PathBuf>, Box<dyn std::error
 }
 
 pub fn get_images(path: &PathBuf) -> Result<Vec<PathBuf>, Box<dyn std::error::Error>> {
-    let paths = fs::read_dir(path)?
+    let mut paths = fs::read_dir(path)?
         .filter_map(|entry| {
             let path = entry.ok()?.path();
 
@@ -44,6 +44,13 @@ pub fn get_images(path: &PathBuf) -> Result<Vec<PathBuf>, Box<dyn std::error::Er
             }
         })
         .collect::<Vec<PathBuf>>();
+
+    paths.sort_by_key(|path| {
+        path.file_stem()
+            .and_then(|stem| stem.to_str())
+            .and_then(|s| s.parse::<usize>().ok())
+            .unwrap_or(usize::MAX)
+    });
 
     Ok(paths)
 }
