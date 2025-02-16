@@ -87,7 +87,7 @@ async fn dir_to_cosense(
                         Some(page)
                     }
                     Err(_) => {
-                        pb.set_message(format!("❌ Error on page {}/{}", index + 1, total_pages));
+                        eprintln!("❌ Error on page {}/{}", index + 1, total_pages);
                         None
                     }
                 }
