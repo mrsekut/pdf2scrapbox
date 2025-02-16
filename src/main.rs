@@ -18,7 +18,6 @@ mod pdfs_to_images;
 mod render_page;
 
 struct Config {
-    wait_time_for_ocr: Duration,
     workspace_dir: PathBuf,
     profile: Option<String>,
     gyazo: Gyazo,
@@ -29,7 +28,6 @@ impl Config {
         dotenv().ok();
         let gyazo_token = env::var("GYAZO_TOKEN")?;
         Ok(Self {
-            wait_time_for_ocr: Duration::from_millis(5000),
             workspace_dir: PathBuf::from("./workspace"),
             profile: Some("mrsekut-merry-firends/mrsekut".to_string()),
             gyazo: Gyazo::new(gyazo_token),
@@ -125,7 +123,7 @@ async fn dir_to_cosense(
     Ok(())
 }
 
-// TODO: retry? rate limit?
+// TODO: rate limiting?
 async fn generate_page(
     config: Arc<Config>,
     index: usize,
@@ -139,10 +137,26 @@ async fn generate_page(
         .await?
         .image_id;
 
-    sleep(config.wait_time_for_ocr).await;
+    let ocr_text = fetch_ocr_text_with_retries(&config, &gyazo_image_id, 5).await?;
 
-    let ocr_text = config.gyazo.image(&gyazo_image_id).await?.ocr.description;
     let page = render_page(index, page_num, &gyazo_image_id, &ocr_text);
-
     Ok(page)
+}
+
+/// Attempt to fetch the OCR text with retries
+async fn fetch_ocr_text_with_retries(
+    config: &Config,
+    gyazo_image_id: &str,
+    max_attempts: usize,
+) -> Result<String, Box<dyn std::error::Error>> {
+    for _ in 0..max_attempts {
+        sleep(Duration::from_millis(5000)).await;
+        if let Ok(image_data) = config.gyazo.image(gyazo_image_id).await {
+            let ocr_text = image_data.ocr.description;
+            if !ocr_text.trim().is_empty() {
+                return Ok(ocr_text);
+            }
+        }
+    }
+    Err("Failed to retrieve OCR result".into())
 }
