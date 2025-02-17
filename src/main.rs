@@ -189,7 +189,7 @@ async fn fetch_ocr_text_with_retries(
                     attempt, max_attempts, e
                 );
                 if attempt < max_attempts {
-                    sleep(Duration::from_secs(5)).await;
+                    sleep(Duration::from_secs(10)).await;
                 }
             }
         }
