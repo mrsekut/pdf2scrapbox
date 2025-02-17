@@ -11,7 +11,7 @@ use std::{
     sync::Arc,
     time::Duration,
 };
-use tokio::{task, time::sleep};
+use tokio::{sync::Semaphore, task, time::sleep};
 
 mod files;
 mod pdfs_to_images;
@@ -74,13 +74,18 @@ async fn dir_to_cosense(
     );
     pb.set_message(format!("Processing pages in {}", dir_path.display()));
 
+    let semaphore = Arc::new(Semaphore::new(50));
+
     let tasks: Vec<_> = images
         .into_iter()
         .enumerate()
         .map(|(index, image)| {
             let config = Arc::clone(&config);
             let pb = pb.clone();
+            let semaphore = Arc::clone(&semaphore);
+
             task::spawn(async move {
+                let _permit = semaphore.acquire().await.unwrap();
                 match generate_page(config, index, image.clone(), total_pages).await {
                     Ok(page) => {
                         pb.inc(1);
@@ -125,7 +130,6 @@ async fn dir_to_cosense(
     Ok(())
 }
 
-// TODO: rate limiting?
 async fn generate_page(
     config: Arc<Config>,
     index: usize,
@@ -133,6 +137,7 @@ async fn generate_page(
     page_num: usize,
 ) -> Result<Page, Box<dyn std::error::Error>> {
     let gyazo_image_id = upload_image_with_retries(config.clone(), pdf_path, 5).await?;
+    sleep(Duration::from_secs(10)).await;
     let ocr_text = fetch_ocr_text_with_retries(&config, &gyazo_image_id, 10).await?;
 
     let page = render_page(index, page_num, &gyazo_image_id, &ocr_text);
@@ -171,7 +176,6 @@ async fn fetch_ocr_text_with_retries(
     max_attempts: usize,
 ) -> Result<String, Box<dyn std::error::Error>> {
     for attempt in 1..=max_attempts {
-        sleep(Duration::from_secs(5)).await;
         match config.gyazo.image(gyazo_image_id).await {
             Ok(image_data) => {
                 let ocr_text = image_data.ocr.description;
@@ -184,6 +188,9 @@ async fn fetch_ocr_text_with_retries(
                     "⚠️ Gyazo OCR retrieval failed (attempt {}/{}): {:?}",
                     attempt, max_attempts, e
                 );
+                if attempt < max_attempts {
+                    sleep(Duration::from_secs(5)).await;
+                }
             }
         }
     }
