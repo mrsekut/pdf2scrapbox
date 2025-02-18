@@ -183,16 +183,13 @@ async fn fetch_ocr_text_with_retries(
                     return Ok(ocr_text);
                 }
             }
-            Err(e) => {
-                eprintln!(
-                    "⚠️ Gyazo OCR retrieval failed (attempt {}/{}): {:?}",
-                    attempt, max_attempts, e
-                );
+            Err(_) => {
                 if attempt < max_attempts {
                     sleep(Duration::from_secs(10)).await;
                 }
             }
         }
     }
+
     Err("Failed to retrieve OCR result after multiple attempts".into())
 }
