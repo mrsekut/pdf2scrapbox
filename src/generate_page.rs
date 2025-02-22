@@ -32,10 +32,7 @@ async fn upload_image_with_retries(
         match config.gyazo.upload(pdf_path.clone(), Some(&options)).await {
             Ok(response) => return Ok(response.image_id),
             Err(e) => {
-                eprintln!(
-                    "⚠️ Gyazo upload failed (attempt {}/{}): {:?}",
-                    attempt, max_attempts, e
-                );
+                eprintln!("⚠️ Gyazo upload failed (attempt {attempt}/{max_attempts}): {e}",);
                 if attempt < max_attempts {
                     sleep(Duration::from_secs(3)).await;
                 }

@@ -24,7 +24,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let _ = pdfs_to_images(pdf_paths, &config.workspace_dir)
         .await
-        .map_err(|e| eprintln!("Error: {:?}", e));
+        .map_err(|e| eprintln!("Error: {e}"));
 
     let dirs = get_image_dirs(&config.workspace_dir)?;
     dirs_to_cosense(config.clone(), &dirs).await;
@@ -74,7 +74,7 @@ async fn dir_to_cosense(
                         Some((index, page))
                     }
                     Err(_) => {
-                        eprintln!("❌ Error on page {}/{}", index + 1, total_pages);
+                        eprintln!("❌ Error on page {index + 1}/{total_pages}");
                         None
                     }
                 }
@@ -105,8 +105,8 @@ async fn dir_to_cosense(
     let json_path = format!("{}-ocr.json", dir_path.display());
 
     match save_json(&Path::new(&json_path), &project) {
-        Ok(_) => println!("✅️Saved JSON to {:?}", json_path),
-        Err(e) => eprintln!("Error: {:?}", e),
+        Ok(_) => println!("✅️Saved JSON to {json_path}"),
+        Err(e) => eprintln!("Error: {e}"),
     };
 
     Ok(())
