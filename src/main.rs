@@ -2,7 +2,7 @@ use config::Config;
 use files::{get_image_dirs, get_images, get_pdf_paths};
 use futures::future;
 use generate_page::generate_page;
-use indicatif::{ProgressBar, ProgressStyle};
+use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
 use pdfs_to_images::pdfs_to_images;
 use render_page::{create_profile_page, save_json, Page, Project};
 use std::{
@@ -33,21 +33,26 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 async fn dirs_to_cosense(config: Arc<Config>, dir_paths: &[PathBuf]) {
+    let m = MultiProgress::new();
+
     let tasks: Vec<_> = dir_paths
         .iter()
-        .map(|dir| dir_to_cosense(config.clone(), dir))
+        .map(|dir| dir_to_cosense(config.clone(), dir, m.clone()))
         .collect();
     future::join_all(tasks).await;
+
+    m.clear().unwrap();
 }
 
 async fn dir_to_cosense(
     config: Arc<Config>,
     dir_path: &PathBuf,
+    m: MultiProgress,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let images = get_images(dir_path)?;
     let total_pages = images.len();
 
-    let pb = ProgressBar::new(total_pages as u64);
+    let pb = m.add(ProgressBar::new(total_pages as u64));
     pb.set_style(
         ProgressStyle::default_bar()
             .template("{msg} [{bar:40}] {pos}/{len} pages")
