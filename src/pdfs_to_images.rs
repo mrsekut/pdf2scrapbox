@@ -9,7 +9,7 @@ pub async fn pdfs_to_images(
     pdfs: Vec<PathBuf>,
     out_dir: &Path,
 ) -> Result<Vec<PathBuf>, Box<dyn std::error::Error>> {
-    has_mutool()?;
+    let _ = has_mutool()?;
 
     let pb = ProgressBar::new(pdfs.len() as u64);
     pb.set_style(
@@ -23,10 +23,15 @@ pub async fn pdfs_to_images(
     let tasks: Vec<_> = pdfs
         .iter()
         .map(|pdf| {
-            pb.inc(1);
-            pdf_to_images(pdf, out_dir)
+            let pb_clone = pb.clone();
+            async move {
+                let res = pdf_to_images(&pdf.clone(), &out_dir).await;
+                pb_clone.inc(1);
+                res
+            }
         })
         .collect();
+
     let paths = join_all(tasks)
         .await
         .into_iter()
