@@ -9,6 +9,8 @@ pub async fn pdfs_to_images(
     pdfs: Vec<PathBuf>,
     out_dir: &Path,
 ) -> Result<Vec<PathBuf>, Box<dyn std::error::Error>> {
+    has_mutool()?;
+
     let pb = ProgressBar::new(pdfs.len() as u64);
     pb.set_style(
         ProgressStyle::default_bar()
@@ -70,5 +72,14 @@ async fn convert_and_save(
         return Err("MuPDF convert failed".into());
     }
 
+    Ok(())
+}
+
+fn has_mutool() -> Result<(), Box<dyn std::error::Error>> {
+    if Command::new("mutool").arg("-v").output().is_err() {
+        return Err(
+            "mutool is not installed or not found in PATH. Please run 'devbox shell'".into(),
+        );
+    }
     Ok(())
 }
