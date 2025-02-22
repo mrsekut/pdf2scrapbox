@@ -56,6 +56,22 @@ async fn dir_to_cosense(
     );
     pb.set_message(format!("Processing pages in {}", dir_path.display()));
 
+    let pages = process_images_concurrently(&config, images, total_pages, pb.clone()).await;
+    pb.finish_with_message(format!("✅ Finished processing {}", dir_path.display()));
+
+    let pages_with_profile = add_profile_page_if_needed(&config, pages).await?;
+
+    save_pages_to_json(dir_path, pages_with_profile)?;
+
+    Ok(())
+}
+
+async fn process_images_concurrently(
+    config: &Arc<Config>,
+    images: Vec<PathBuf>,
+    total_pages: usize,
+    pb: ProgressBar,
+) -> Vec<Page> {
     let semaphore = Arc::new(Semaphore::new(50));
 
     let tasks: Vec<_> = images
@@ -71,10 +87,10 @@ async fn dir_to_cosense(
                 match generate_page(config, index, image.clone(), total_pages).await {
                     Ok(page) => {
                         pb.inc(1);
-                        Some((index, page))
+                        Some(page)
                     }
                     Err(_) => {
-                        eprintln!("❌ Error on page {index + 1}/{total_pages}");
+                        eprintln!("❌ Error on page {}/{}", index + 1, total_pages);
                         None
                     }
                 }
@@ -82,31 +98,38 @@ async fn dir_to_cosense(
         })
         .collect();
 
-    let pages: Vec<Page> = future::join_all(tasks)
+    future::join_all(tasks)
         .await
         .into_iter()
         .filter_map(Result::ok)
         .flatten()
-        .map(|(_, page)| page)
-        .collect();
+        .collect()
+}
 
-    pb.finish_with_message(format!("✅ Finished processing {}", dir_path.display()));
-
-    let pages_with_profile = if let Some(profile) = &config.profile {
-        let profile = create_profile_page(profile).await?;
-        std::iter::once(profile).chain(pages.into_iter()).collect()
+async fn add_profile_page_if_needed(
+    config: &Arc<Config>,
+    pages: Vec<Page>,
+) -> Result<Vec<Page>, Box<dyn std::error::Error>> {
+    if let Some(profile) = &config.profile {
+        let profile_page = create_profile_page(profile).await?;
+        Ok(std::iter::once(profile_page)
+            .chain(pages.into_iter())
+            .collect())
     } else {
-        pages
-    };
+        Ok(pages)
+    }
+}
 
-    let project = Project {
-        pages: pages_with_profile,
-    };
+fn save_pages_to_json(
+    dir_path: &PathBuf,
+    pages: Vec<Page>,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let project = Project { pages };
     let json_path = format!("{}-ocr.json", dir_path.display());
 
     match save_json(&Path::new(&json_path), &project) {
-        Ok(_) => println!("✅️Saved JSON to {json_path}"),
-        Err(e) => eprintln!("Error: {e}"),
+        Ok(_) => println!("✅️Saved JSON to {:?}", json_path),
+        Err(e) => eprintln!("Error: {:?}", e),
     };
 
     Ok(())
